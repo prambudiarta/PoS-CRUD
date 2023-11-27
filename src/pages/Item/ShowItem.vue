@@ -1,6 +1,20 @@
 <template>
   <q-page padding>
-    <q-table title="Items List" :rows="items" :columns="columns" row-key="id">
+    <div class="flex justify-between q-mb-md">
+      <q-btn
+        label="Create Item"
+        color="primary"
+        @click="openNewItemForm"
+        class="q-mr-md"
+      />
+      <q-input v-model="searchQuery" placeholder="Search items by name..." />
+    </div>
+    <q-table
+      title="Items List"
+      :rows="filteredItems"
+      :columns="columns"
+      row-key="id"
+    >
       <!-- Custom slot for image -->
       <template v-slot:body-cell-image="props">
         <q-td :props="props">
@@ -28,7 +42,7 @@
 </template>
 
 <script lang="ts">
-import { ref, onMounted, Ref, watch } from 'vue';
+import { ref, onMounted, Ref, watch, computed } from 'vue';
 import { useItemStore } from 'src/stores/item-store';
 import { Item } from 'src/types/interfaces';
 import { QTableColumn } from 'quasar';
@@ -48,6 +62,21 @@ export default {
     const items = ref<Item[]>([]);
     const itemForm = ref() as Ref<ItemFormComponent | null>;
     const editableItem = ref({});
+    const searchQuery = ref('');
+
+    const openNewItemForm = () => {
+      editableItem.value = {}; // Reset or set up a new item structure
+      isDialogOpen.value = true;
+    };
+
+    const filteredItems = computed(() => {
+      if (!searchQuery.value) {
+        return items.value; // Return all items if search query is empty
+      }
+      return items.value.filter((item) =>
+        item.name.toLowerCase().includes(searchQuery.value.toLowerCase())
+      );
+    });
 
     const columns: QTableColumn[] = [
       {
@@ -145,6 +174,9 @@ export default {
       itemForm,
       editableItem,
       isDialogOpen,
+      searchQuery,
+      filteredItems,
+      openNewItemForm,
       editItem,
       updateItem,
       deleteItem,

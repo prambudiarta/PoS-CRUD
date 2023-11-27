@@ -48,9 +48,14 @@ export const useItemStore = defineStore('itemStore', {
       // Optionally, you could also remove the item from the local 'items' array
       this.items = this.items.filter((item) => item.id !== itemId);
     },
-    async updateItem(updatedItem: Item) {
+    async updateItem(updatedItem: Item, file: File | null) {
       if (!updatedItem.id) {
         throw new Error('Item must have an ID for updating');
+      }
+
+      let imageUrl = '';
+      if (file) {
+        imageUrl = await uploadImage(file);
       }
 
       const itemRef = doc(db, 'items', updatedItem.id);
@@ -59,7 +64,7 @@ export const useItemStore = defineStore('itemStore', {
         name: updatedItem.name,
         price: updatedItem.price,
         category: updatedItem.category,
-        imageUrl: updatedItem.imageUrl,
+        imageUrl: imageUrl === '' ? updatedItem.imageUrl : imageUrl,
       };
 
       await updateDoc(itemRef, updateObject);

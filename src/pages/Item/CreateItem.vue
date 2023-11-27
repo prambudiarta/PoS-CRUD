@@ -72,6 +72,7 @@ export default {
     const categories = ref(['Drinks', 'Snacks', 'Main Course', 'Desserts']);
 
     const onSubmit = async () => {
+      console.log(imageFile.value);
       try {
         await itemStore.saveItem(item.value, imageFile.value);
 
