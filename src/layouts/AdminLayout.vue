@@ -11,9 +11,7 @@
           @click="toggleLeftDrawer"
         />
 
-        <q-toolbar-title>
-          Karaoke Room PoS
-        </q-toolbar-title>
+        <q-toolbar-title> Reservasi Lapangan </q-toolbar-title>
 
         <div>Quasar v{{ quasarVersion }}</div>
       </q-toolbar>
@@ -24,35 +22,35 @@
       <q-list>
         <!-- Item Menu -->
         <q-item clickable v-ripple @click="toggleItemMenu">
-          <q-item-section>Item</q-item-section>
+          <q-item-section>Lapangan</q-item-section>
           <q-item-section side>
             <q-icon :name="itemMenuExpanded ? 'expand_less' : 'expand_more'" />
           </q-item-section>
         </q-item>
         <q-separator v-if="itemMenuExpanded" />
-        <q-item v-if="itemMenuExpanded" clickable v-ripple @click="selectMenu('ItemCreate')">Create Item</q-item>
-        <q-item v-if="itemMenuExpanded" clickable v-ripple @click="selectMenu('ItemShow')">Show Item</q-item>
+        <q-item
+          v-if="itemMenuExpanded"
+          clickable
+          v-ripple
+          @click="selectMenu('LapanganShow')"
+          >Show Lapangan</q-item
+        >
 
         <!-- Order Menu -->
         <q-item clickable v-ripple @click="toggleOrderMenu">
-          <q-item-section>Order</q-item-section>
+          <q-item-section>Booking</q-item-section>
           <q-item-section side>
             <q-icon :name="orderMenuExpanded ? 'expand_less' : 'expand_more'" />
           </q-item-section>
         </q-item>
         <q-separator v-if="orderMenuExpanded" />
-        <q-item v-if="orderMenuExpanded" clickable v-ripple @click="selectMenu('OrderShow')">Show Order</q-item>
-        <q-item v-if="orderMenuExpanded" clickable v-ripple @click="selectMenu('OrderPrint')">Print Order</q-item>
-
-        <!-- Bill Menu -->
-        <q-item clickable v-ripple @click="toggleBillMenu">
-          <q-item-section>Bill</q-item-section>
-          <q-item-section side>
-            <q-icon :name="billMenuExpanded ? 'expand_less' : 'expand_more'" />
-          </q-item-section>
-        </q-item>
-        <q-separator v-if="billMenuExpanded" />
-        <q-item v-if="billMenuExpanded" clickable v-ripple @click="selectMenu('BillShow')">Show Bill</q-item>
+        <q-item
+          v-if="orderMenuExpanded"
+          clickable
+          v-ripple
+          @click="selectMenu('BookingShow')"
+          >Show Booking</q-item
+        >
       </q-list>
     </q-drawer>
 
@@ -62,7 +60,6 @@
     </q-page-container>
   </q-layout>
 </template>
-
 
 <script lang="ts">
 import { ref, computed } from 'vue';
@@ -97,7 +94,7 @@ export default {
     };
 
     const selectMenu = (menuItem: string) => {
-      router.push({name: menuItem})
+      router.push({ name: menuItem });
       // Perform actions based on menuItem
     };
 
@@ -111,9 +108,9 @@ export default {
       toggleOrderMenu,
       toggleBillMenu,
       selectMenu,
-      quasarVersion
+      quasarVersion,
     };
-  }
+  },
 };
 </script>
 

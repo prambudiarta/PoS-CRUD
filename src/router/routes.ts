@@ -12,18 +12,13 @@ const routes: RouteRecordRaw[] = [
     children: [{ path: '', component: () => import('pages/IndexPage.vue') }],
   },
   {
-    path: '/item',
+    path: '/lapangan',
     component: () => import('layouts/AdminLayout.vue'),
     children: [
       {
-        path: 'create', // Removed the leading '/'
-        name: 'ItemCreate',
-        component: () => import('pages/item/CreateItem.vue'),
-      },
-      {
         path: 'show', // Removed the leading '/'
-        name: 'ItemShow',
-        component: () => import('pages/item/ShowItem.vue'),
+        name: 'LapanganShow',
+        component: () => import('pages/item/ShowLapangan.vue'),
       },
     ],
   },
