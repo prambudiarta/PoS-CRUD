@@ -104,9 +104,9 @@ export default {
     };
 
     // Define editLapangan, updateLapangan, deleteLapangan similarly to the corresponding item actions
-    const deleteLapangan = async (item: Item) => {
-      if (typeof item.id === 'undefined') {
-        Swal.fire('Error', 'Item ID is undefined.', 'error');
+    const deleteLapangan = async (lapangan: Lapangan) => {
+      if (typeof lapangan.id === 'undefined') {
+        Swal.fire('Error', 'Lapangan ID is undefined.', 'error');
         return;
       }
 
@@ -120,15 +120,13 @@ export default {
         confirmButtonText: 'Yes, delete it!',
       }).then(async (result) => {
         if (result.isConfirmed) {
-          if (typeof item.id === 'undefined') {
-            Swal.fire('Error', 'Item ID is undefined.', 'error');
+          if (typeof lapangan.id === 'undefined') {
+            Swal.fire('Error', 'Lapangan ID is undefined.', 'error');
             return;
           } else {
-            // await itemStore.deleteItem(item.id);
-            // await itemStore.fetchItems();
-            // items.value = itemStore.items;
+            await liveDataStore.deleteLapangan(lapangan.id);
             Swal.fire('Deleted!', 'Your item has been deleted.', 'success');
-            // Refresh items list or handle UI update here
+            await fetchLapangan();
           }
         }
       });

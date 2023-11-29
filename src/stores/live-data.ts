@@ -10,6 +10,10 @@ import {
 import { defineStore } from 'pinia';
 import { db } from 'src/firebaseConfig';
 import { Booking, Lapangan } from 'src/types/interfaces';
+import {
+  generateUniqueCode,
+  isCodeUnique,
+} from 'src/utils/bookingCodeGenerator';
 
 export const useLiveData = defineStore('liveData', {
   state: () => ({
@@ -67,6 +71,14 @@ export const useLiveData = defineStore('liveData', {
         ];
       }
     },
+    async deleteLapangan(lapanganId: string | null) {
+      if (lapanganId) {
+        await deleteDoc(doc(db, 'lapangan', lapanganId));
+        this.lapangan = this.lapangan.filter(
+          (lapangan) => lapangan.id !== lapanganId
+        );
+      }
+    },
     async fetchBookings() {
       const bookingsSnapshot = await getDocs(collection(db, 'bookings'));
       this.bookings = bookingsSnapshot.docs.map((doc) => {
@@ -75,17 +87,25 @@ export const useLiveData = defineStore('liveData', {
           id: doc.id,
           code: data.code,
           email: data.email,
-          endTime: data.endTime.toDate(), // converting Timestamp to Date
+          endTime: data.endTime, // converting Timestamp to Date
           lapangan: data.lapangan,
           phoneNumber: data.phoneNumber,
-          startTime: data.startTime.toDate(), // converting Timestamp to Date
+          startTime: data.startTime, // converting Timestamp to Date
         };
         return booking;
       });
     },
-    async saveBooking(newBooking: Omit<Booking, 'id'>) {
-      const docRef = await addDoc(collection(db, 'bookings'), newBooking);
-      this.bookings.push({ ...newBooking, id: docRef.id });
+    async saveBooking(newBooking: Omit<Booking, 'id' | 'code'>) {
+      let uniqueCode;
+      let isUnique = false;
+
+      while (!isUnique) {
+        uniqueCode = generateUniqueCode();
+        isUnique = await isCodeUnique(uniqueCode);
+      }
+
+      const bookingWithCode = { ...newBooking, code: uniqueCode };
+      await addDoc(collection(db, 'bookings'), bookingWithCode);
     },
     async updateBooking(updatedBooking: Booking) {
       if (!updatedBooking.id) {
@@ -116,11 +136,13 @@ export const useLiveData = defineStore('liveData', {
         this.bookings.splice(index, 1, updatedBooking);
       }
     },
-    async deleteBooking(bookingId: string) {
-      await deleteDoc(doc(db, 'bookings', bookingId));
-      this.bookings = this.bookings.filter(
-        (booking) => booking.id !== bookingId
-      );
+    async deleteBooking(bookingId: string | null) {
+      if (bookingId) {
+        await deleteDoc(doc(db, 'bookings', bookingId));
+        this.bookings = this.bookings.filter(
+          (booking) => booking.id !== bookingId
+        );
+      }
     },
   },
 });

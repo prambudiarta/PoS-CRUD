@@ -9,82 +9,38 @@
 
       <q-card-section>
         <!-- Form for booking data -->
-        <q-input v-model="localBooking.code" label="Booking Code" />
-        <q-input v-model="localBooking.lapangan" label="Lapangan" />
+        <q-select
+          filled
+          v-model="localBooking.lapangan"
+          :options="lapanganOptions"
+          label="Lapangan"
+          emit-value
+          map-options
+        />
+        <q-input v-model="localBooking.email" label="Email" />
+        <q-input v-model="localBooking.phoneNumber" label="Nomor HP" />
 
-        <!-- Start Time Datepicker -->
-        <q-input filled v-model="localBooking.startTime" label="Start Time">
-          <template v-slot:append>
-            <q-icon name="event" class="cursor-pointer">
-              <q-popup-proxy
-                ref="qStartDateTimeProxy"
-                transition-show="scale"
-                transition-hide="scale"
-              >
-                <q-date
-                  v-model="localBooking.startTime"
-                  :min="minDate"
-                  :max="maxDate"
-                  @input="
-                    () => {
-                      $refs.qStartDateTimeProxy.hide();
-                    }
-                  "
-                >
-                  <div class="row items-center justify-end">
-                    <q-time
-                      v-model="localBooking.startTime"
-                      format24h
-                      @input="
-                        () => {
-                          $refs.qStartDateTimeProxy.hide();
-                        }
-                      "
-                    />
-                    <q-btn flat label="Close" color="primary" v-close-popup />
-                  </div>
-                </q-date>
-              </q-popup-proxy>
-            </q-icon>
-          </template>
-        </q-input>
+        <!-- Start Date and Time Picker (native HTML5) -->
+        <div class="q-mb-md">
+          <label for="start-datetime">Start Date and Time:</label>
+          <input
+            type="datetime-local"
+            id="start-datetime"
+            v-model="localBooking.startTime"
+            class="q-ml-sm"
+          />
+        </div>
 
-        <!-- End Time Datepicker -->
-        <q-input filled v-model="localBooking.endTime" label="End Time">
-          <template v-slot:append>
-            <q-icon name="event" class="cursor-pointer">
-              <q-popup-proxy
-                ref="qEndDateTimeProxy"
-                transition-show="scale"
-                transition-hide="scale"
-              >
-                <q-date
-                  v-model="localBooking.endTime"
-                  :min="minDate"
-                  :max="maxDate"
-                  @input="
-                    () => {
-                      $refs.qEndDateTimeProxy.hide();
-                    }
-                  "
-                >
-                  <div class="row items-center justify-end">
-                    <q-time
-                      v-model="localBooking.endTime"
-                      format24h
-                      @input="
-                        () => {
-                          $refs.qEndDateTimeProxy.hide();
-                        }
-                      "
-                    />
-                    <q-btn flat label="Close" color="primary" v-close-popup />
-                  </div>
-                </q-date>
-              </q-popup-proxy>
-            </q-icon>
-          </template>
-        </q-input>
+        <!-- End Date and Time Picker (native HTML5) -->
+        <div class="q-mb-md">
+          <label for="end-datetime">End Date and Time:</label>
+          <input
+            type="datetime-local"
+            id="end-datetime"
+            v-model="localBooking.endTime"
+            class="q-ml-sm"
+          />
+        </div>
         <!-- Add other fields as needed for booking -->
       </q-card-section>
 
@@ -97,7 +53,7 @@
 </template>
 
 <script>
-import { ref, computed, watch, toRefs } from 'vue';
+import { ref, computed, watch, toRefs, onMounted } from 'vue';
 import { useLiveData } from 'src/stores/live-data';
 
 export default {
@@ -105,17 +61,13 @@ export default {
     booking: Object,
     isOpen: Boolean,
   },
-  setup(props, { emit }) {
+  setup(props) {
     const { isOpen } = toRefs(props);
     const dialog = ref(isOpen.value);
     const localBooking = ref({ ...props.booking });
     const isEditMode = computed(() => props.booking && props.booking.id);
     const liveDataStore = useLiveData();
-
-    const minDate = new Date(); // or any other logic to set the minimum date
-    const maxDate = new Date(
-      new Date().setFullYear(new Date().getFullYear() + 1)
-    ); // or any other logic to set the maximum date
+    const lapanganOptions = ref([]);
 
     watch(isOpen, (newValue) => {
       dialog.value = newValue;
@@ -129,6 +81,13 @@ export default {
       { deep: true }
     );
 
+    const fetchLapanganOptions = async () => {
+      lapanganOptions.value = liveDataStore.lapangan.map((doc) => ({
+        label: doc.nama, // Adjust if your field is named differently
+        value: doc.nama,
+      }));
+    };
+
     const saveBooking = async () => {
       try {
         if (isEditMode.value) {
@@ -141,20 +100,23 @@ export default {
 
         // Close the dialog and emit an event to refresh the bookings list
         dialog.value = false;
-        emit('update:isOpen', false);
-        emit('saved');
+        window.location.reload();
       } catch (error) {
         console.error('Error saving booking:', error);
         // Handle the error, e.g., show a notification to the user
       }
     };
 
+    onMounted(async () => {
+      await liveDataStore.fetchLapangan();
+      fetchLapanganOptions();
+    });
+
     return {
       dialog,
       localBooking,
       isEditMode,
-      minDate,
-      maxDate,
+      lapanganOptions,
       saveBooking,
     };
   },

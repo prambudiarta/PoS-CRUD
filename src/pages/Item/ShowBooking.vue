@@ -60,6 +60,7 @@ export default {
     const searchQuery = ref('');
 
     const openNewBookingForm = () => {
+      console.log('open booking');
       editableBooking.value = {}; // Reset or set up a new booking structure
       isDialogOpen.value = true;
     };
@@ -129,19 +130,20 @@ export default {
     };
 
     const editBooking = (booking: Booking) => {
+      console.log('edit booking');
+      console.log(booking);
       editableBooking.value = booking;
       isDialogOpen.value = true;
     };
 
     const updateBooking = async (booking: Booking) => {
       await liveDataStore.updateBooking(booking);
-      // Optionally, you can refresh the bookings list after the update
       await fetchBookings();
     };
 
     const deleteBooking = async (booking: Booking) => {
-      if (!booking.code) {
-        Swal.fire('Error', 'Booking code is undefined.', 'error');
+      if (typeof booking.id === 'undefined') {
+        Swal.fire('Error', 'Lapangan ID is undefined.', 'error');
         return;
       }
 
@@ -155,13 +157,26 @@ export default {
         confirmButtonText: 'Yes, delete it!',
       }).then(async (result) => {
         if (result.isConfirmed) {
-          await liveDataStore.deleteBooking(booking.code);
-          Swal.fire('Deleted!', 'The booking has been deleted.', 'success');
-          // Refresh bookings list
-          await fetchBookings();
+          if (typeof booking.id === 'undefined') {
+            Swal.fire('Error', 'Booking ID is undefined.', 'error');
+            return;
+          } else {
+            await liveDataStore.deleteBooking(booking.id);
+            Swal.fire('Deleted!', 'The booking has been deleted.', 'success');
+            await fetchBookings();
+          }
         }
       });
     };
+
+    watch(
+      () => bookingForm.value?.dialog,
+      (newVal) => {
+        if (newVal === false) {
+          isDialogOpen.value = false;
+        }
+      }
+    );
 
     onMounted(fetchBookings);
 
