@@ -15,6 +15,7 @@ export interface Lapangan {
 
 export interface Booking {
   id?: string;
+  code: string;
   email: string;
   endTime: Date;
   lapangan: string;

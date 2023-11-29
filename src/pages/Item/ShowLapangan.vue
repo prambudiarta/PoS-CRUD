@@ -58,7 +58,6 @@ export default {
     const searchQuery = ref('');
 
     const openNewLapanganForm = () => {
-      console.log('editable lapangan');
       editableLapangan.value = {}; // Reset or set up a new lapangan structure
       isDialogOpen.value = true;
     };

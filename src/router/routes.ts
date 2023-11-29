@@ -22,6 +22,17 @@ const routes: RouteRecordRaw[] = [
       },
     ],
   },
+  {
+    path: '/booking',
+    component: () => import('layouts/AdminLayout.vue'),
+    children: [
+      {
+        path: 'show', // Removed the leading '/'
+        name: 'BookingShow',
+        component: () => import('pages/item/ShowBooking.vue'),
+      },
+    ],
+  },
 
   // Always leave this as last one,
   // but you can also remove it
