@@ -55,13 +55,14 @@
 <script>
 import { ref, computed, watch, toRefs, onMounted } from 'vue';
 import { useLiveData } from 'src/stores/live-data';
+import Swal from 'sweetalert2';
 
 export default {
   props: {
     booking: Object,
     isOpen: Boolean,
   },
-  setup(props) {
+  setup(props, { emit }) {
     const { isOpen } = toRefs(props);
     const dialog = ref(isOpen.value);
     const localBooking = ref({ ...props.booking });
@@ -93,14 +94,29 @@ export default {
         if (isEditMode.value) {
           // Existing booking: update it
           await liveDataStore.updateBooking(localBooking.value);
+          dialog.value = false;
         } else {
           // New booking: add it
-          await liveDataStore.saveBooking(localBooking.value);
+          const result = await liveDataStore.saveBooking(localBooking.value);
+
+          if (result === 'OK') {
+            dialog.value = false;
+            emit('save');
+            Swal.fire('Success', result, 'success');
+
+            return;
+          } else {
+            dialog.value = false;
+            emit('save');
+            Swal.fire('Error', result, 'error');
+
+            return;
+          }
         }
 
         // Close the dialog and emit an event to refresh the bookings list
-        dialog.value = false;
-        window.location.reload();
+        emit('save');
+        // window.location.reload();
       } catch (error) {
         console.error('Error saving booking:', error);
         // Handle the error, e.g., show a notification to the user

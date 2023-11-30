@@ -36,7 +36,7 @@
 
 <script lang="ts">
 import { ref, onMounted, Ref, watch, computed } from 'vue';
-import { Item, Lapangan } from 'src/types/interfaces';
+import { Lapangan } from 'src/types/interfaces';
 import { QTableColumn } from 'quasar';
 import Swal from 'sweetalert2';
 import LapanganForm from 'src/components/LapanganComponent.vue';

@@ -4,8 +4,10 @@ import {
   deleteDoc,
   doc,
   getDocs,
+  query,
   Timestamp,
   updateDoc,
+  where,
 } from 'firebase/firestore';
 import { defineStore } from 'pinia';
 import { db } from 'src/firebaseConfig';
@@ -95,45 +97,111 @@ export const useLiveData = defineStore('liveData', {
         return booking;
       });
     },
-    async saveBooking(newBooking: Omit<Booking, 'id' | 'code'>) {
-      let uniqueCode;
-      let isUnique = false;
+    async saveBooking(
+      newBooking: Omit<Booking, 'id' | 'code'>
+    ): Promise<string> {
+      // Convert the start and end times to Date objects if they are not already
+      const startTime = new Date(newBooking.startTime);
+      const endTime = new Date(newBooking.endTime);
+      const now = new Date();
 
-      while (!isUnique) {
-        uniqueCode = generateUniqueCode();
-        isUnique = await isCodeUnique(uniqueCode);
+      // Check 1: start datetime can't be in the past
+      if (startTime < now) {
+        return 'Start datetime cannot be in the past.';
       }
 
-      const bookingWithCode = { ...newBooking, code: uniqueCode };
-      await addDoc(collection(db, 'bookings'), bookingWithCode);
+      // Check 2: end datetime must be greater than start datetime
+      if (endTime <= startTime) {
+        return 'End datetime must be greater than start datetime.';
+      }
+
+      try {
+        // Check if the time slot is available
+        const available = await this.isTimeSlotAvailable(
+          newBooking.lapangan,
+          newBooking.startTime,
+          newBooking.endTime
+        );
+
+        if (!available) {
+          return 'This time slot is already booked for the selected lapangan.';
+        }
+
+        // Generate a unique code
+        let uniqueCode;
+        let isUnique = false;
+
+        while (!isUnique) {
+          uniqueCode = generateUniqueCode();
+          isUnique = await isCodeUnique(uniqueCode);
+        }
+
+        const bookingWithCode = { ...newBooking, code: uniqueCode };
+        await addDoc(collection(db, 'bookings'), bookingWithCode);
+
+        return 'OK';
+      } catch (error) {
+        console.error(error);
+        return 'An error occurred while saving the booking.';
+      }
     },
-    async updateBooking(updatedBooking: Booking) {
+    async updateBooking(updatedBooking: Booking): Promise<string> {
       if (!updatedBooking.id) {
-        throw new Error('Booking must have an ID for updating');
+        return 'Booking must have an ID for updating.';
       }
 
-      const bookingRef = doc(db, 'bookings', updatedBooking.id);
+      // Convert the start and end times to Date objects if they are not already
+      const startTime = new Date(updatedBooking.startTime);
+      const endTime = new Date(updatedBooking.endTime);
+      const now = new Date();
 
-      const updateObject = {
-        code: updatedBooking.code,
-        email: updatedBooking.email,
-        lapangan: updatedBooking.lapangan,
-        phoneNumber: updatedBooking.phoneNumber,
-        startTime: Timestamp.fromDate(new Date(updatedBooking.startTime)), // assuming updatedBooking.startTime is a Date
-        endTime: Timestamp.fromDate(new Date(updatedBooking.endTime)), // assuming updatedBooking.endTime is a Date // converting Timestamp to Date
-        // ... other fields to update
-        // Note: If you're updating startTime or endTime,
-        // you may need to convert them to Firestore Timestamps
-      };
+      // Check 1: start datetime can't be in the past
+      if (startTime < now) {
+        return 'Start datetime cannot be in the past.';
+      }
 
-      await updateDoc(bookingRef, updateObject);
+      // Check 2: end datetime must be greater than start datetime
+      if (endTime <= startTime) {
+        return 'End datetime must be greater than start datetime.';
+      }
 
-      const index = this.bookings.findIndex(
-        (booking) => booking.id === updatedBooking.id
+      // Check if the time slot is available
+      const available = await this.isTimeSlotAvailable(
+        updatedBooking.lapangan,
+        startTime,
+        endTime
       );
 
-      if (index !== -1) {
-        this.bookings.splice(index, 1, updatedBooking);
+      if (!available) {
+        return 'This time slot is already booked for the selected lapangan.';
+      }
+
+      try {
+        const bookingRef = doc(db, 'bookings', updatedBooking.id);
+
+        const updateObject = {
+          code: updatedBooking.code,
+          email: updatedBooking.email,
+          lapangan: updatedBooking.lapangan,
+          phoneNumber: updatedBooking.phoneNumber,
+          startTime: Timestamp.fromDate(startTime), // Convert Date to Firestore Timestamp
+          endTime: Timestamp.fromDate(endTime),
+        };
+
+        await updateDoc(bookingRef, updateObject);
+
+        const index = this.bookings.findIndex(
+          (booking) => booking.id === updatedBooking.id
+        );
+
+        if (index !== -1) {
+          this.bookings.splice(index, 1, updatedBooking);
+        }
+
+        return 'Booking updated successfully.';
+      } catch (error) {
+        console.error('Error updating booking:', error);
+        return 'An error occurred while updating the booking.';
       }
     },
     async deleteBooking(bookingId: string | null) {
@@ -143,6 +211,28 @@ export const useLiveData = defineStore('liveData', {
           (booking) => booking.id !== bookingId
         );
       }
+    },
+    async isTimeSlotAvailable(
+      lapanganId: string,
+      newStartTime: Date,
+      newEndTime: Date
+    ) {
+      const bookingsRef = collection(db, 'bookings');
+      // Query for bookings that have an endTime greater than the newStartTime
+      const bookingsQuery = query(
+        bookingsRef,
+        where('lapangan', '==', lapanganId),
+        where('endTime', '>', newStartTime)
+      );
+
+      const querySnapshot = await getDocs(bookingsQuery);
+      // Filter the results manually to find any that have a startTime less than the newEndTime
+      const overlaps = querySnapshot.docs.some((doc) => {
+        const booking = doc.data();
+        return booking.startTime < newEndTime;
+      });
+
+      return !overlaps;
     },
   },
 });
