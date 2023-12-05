@@ -64,11 +64,11 @@ export default {
 
         // Close the dialog and refresh the lapangan list
         dialog.value = false;
-        emit('save');
       } catch (error) {
         console.error('Error saving lapangan:', error);
         // Handle the error, e.g., show a notification to the user
       }
+      emit('save');
     };
 
     return {

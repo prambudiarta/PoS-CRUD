@@ -91,31 +91,26 @@ export default {
 
     const saveBooking = async () => {
       try {
+        let result = '';
         if (isEditMode.value) {
           // Existing booking: update it
-          await liveDataStore.updateBooking(localBooking.value);
-          dialog.value = false;
+          result = await liveDataStore.updateBooking(localBooking.value);
         } else {
           // New booking: add it
-          const result = await liveDataStore.saveBooking(localBooking.value);
+          result = await liveDataStore.saveBooking(localBooking.value);
+        }
 
-          if (result === 'OK') {
-            dialog.value = false;
-            emit('save');
-            Swal.fire('Success', result, 'success');
-
-            return;
-          } else {
-            dialog.value = false;
-            emit('save');
-            Swal.fire('Error', result, 'error');
-
-            return;
-          }
+        if (result === 'OK') {
+          dialog.value = false;
+          emit('save');
+          Swal.fire('Success', result, 'success');
+        } else {
+          dialog.value = false;
+          emit('save');
+          Swal.fire('Error', result, 'error');
         }
 
         // Close the dialog and emit an event to refresh the bookings list
-        emit('save');
         // window.location.reload();
       } catch (error) {
         console.error('Error saving booking:', error);

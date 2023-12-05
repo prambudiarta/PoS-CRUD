@@ -1,13 +1,50 @@
 <template>
   <q-page padding>
-    <div class="flex justify-between q-mb-md">
-      <q-btn
-        label="Create Booking"
-        color="primary"
-        @click="openNewBookingForm"
-        class="q-mr-md"
-      />
-      <q-input v-model="searchQuery" placeholder="Search bookings by code" />
+    <div class="flex justify-between row q-mb-md">
+      <!-- Actions Section -->
+      <div class="flex column q-mr-md">
+        <div class="text-h6 q-mb-md">Actions</div>
+        <q-btn
+          label="Create Booking"
+          color="primary"
+          @click="openNewBookingForm"
+          class="q-mb-md buttonAction"
+        />
+        <q-btn
+          label="Download"
+          @click="exportToExcel"
+          class="buttonAction downloadButton"
+        />
+      </div>
+
+      <!-- Filters Section -->
+      <div class="flex column">
+        <div class="text-h6 q-mb-md">Filters</div>
+        <div class="flex row q-mb-md">
+          <div class="flex column q-mr-md">
+            <div class="text-subtitle2">Start Date</div>
+            <q-date v-model="startDateFilter" mask="YYYY-MM-DD" />
+          </div>
+          <div class="flex column q-mr-md">
+            <div class="text-subtitle2">End Date</div>
+            <q-date v-model="endDateFilter" mask="YYYY-MM-DD" />
+          </div>
+        </div>
+        <div class="flex row q-mb-md">
+          <q-select
+            v-model="filterSelection"
+            :options="['SEMUA', 'SELESAI', 'BERJALAN', 'AKAN DATANG']"
+            label="Filter Bookings"
+            style="width: 200px"
+            class="q-mr-md"
+          />
+          <q-input
+            v-model="searchQuery"
+            placeholder="Code"
+            style="width: 200px"
+          />
+        </div>
+      </div>
     </div>
     <q-table
       title="Booking List"
@@ -15,7 +52,14 @@
       :columns="columns"
       row-key="id"
     >
-      <!-- Custom slot for actions -->
+      <!-- Custom slot for code -->
+      <template v-slot:body-cell-code="props">
+        <q-td :props="props">
+          <div>
+            <q-badge :color="getBadgeColor(props.row)" :label="props.value" />
+          </div>
+        </q-td>
+      </template>
       <template v-slot:body-cell-actions="props">
         <q-td :props="props">
           <q-btn flat icon="edit" @click="editBooking(props.row)" />
@@ -42,6 +86,9 @@ import Swal from 'sweetalert2';
 import BookingForm from 'src/components/BookingComponent.vue'; // Update path as needed
 import { useLiveData } from 'src/stores/live-data'; // Update path as needed
 import formatDateFirestore from 'src/utils/firebaseDateFormatter';
+import alasql from 'alasql';
+import * as XLSX from 'xlsx';
+import { rupiah } from 'src/utils/formatRupiah';
 
 export default {
   components: { BookingForm },
@@ -52,12 +99,18 @@ export default {
       // Add other methods or properties you need to access
     };
 
+    const alasqlWithXLSX = alasql as any;
+    alasqlWithXLSX.utils.global.XLSX = XLSX;
+
     const isDialogOpen = ref(false);
     const liveDataStore = useLiveData();
     const bookings = ref<Booking[]>([]);
     const bookingForm = ref() as Ref<BookingFormComponent | null>; // Adjust to your form component type
     const editableBooking = ref({});
     const searchQuery = ref('');
+    const filterSelection = ref('SEMUA');
+    const startDateFilter = ref('');
+    const endDateFilter = ref('');
 
     const openNewBookingForm = () => {
       console.log('open booking');
@@ -66,12 +119,53 @@ export default {
     };
 
     const filteredBookings = computed(() => {
-      if (!searchQuery.value) {
-        return bookings.value;
+      const now = new Date();
+
+      // First filter based on the search query
+      let result = bookings.value.filter((booking) => {
+        return booking.code
+          .toLowerCase()
+          .includes(searchQuery.value.toLowerCase());
+      });
+
+      // Then filter based on the time status
+      result = result.filter((booking) => {
+        const startTime = new Date(booking.startTime);
+        const endTime = new Date(booking.endTime);
+
+        switch (filterSelection.value) {
+          case 'SELESAI':
+            return endTime < now;
+          case 'BERJALAN':
+            return startTime <= now && now <= endTime;
+          case 'AKAN DATANG':
+            return startTime > now;
+          case 'SEMUA':
+          default:
+            return true;
+        }
+      });
+
+      if (startDateFilter.value) {
+        const startDate = new Date(startDateFilter.value);
+        result = result.filter((booking) => {
+          const bookingStartDate = new Date(booking.startTime);
+          return bookingStartDate >= startDate;
+        });
       }
-      return bookings.value.filter((booking) =>
-        booking.code.toLowerCase().includes(searchQuery.value.toLowerCase())
-      );
+
+      // Filter by end date
+      if (endDateFilter.value) {
+        const endDate = new Date(endDateFilter.value);
+        result = result.filter((booking) => {
+          const bookingEndDate = new Date(booking.endTime);
+          return bookingEndDate <= endDate;
+        });
+      }
+
+      return result;
+
+      return result;
     });
 
     const columns: QTableColumn[] = [
@@ -99,6 +193,13 @@ export default {
         name: 'lapangan',
         label: 'Lapangan',
         field: 'lapangan',
+        sortable: true,
+      },
+      {
+        name: 'harga',
+        label: 'Harga',
+        field: 'harga',
+        format: (val) => rupiah(val),
         sortable: true,
       },
       {
@@ -136,8 +237,7 @@ export default {
       isDialogOpen.value = true;
     };
 
-    const updateBooking = async (booking: Booking) => {
-      await liveDataStore.updateBooking(booking);
+    const updateBooking = async () => {
       await fetchBookings();
     };
 
@@ -169,6 +269,23 @@ export default {
       });
     };
 
+    const exportToExcel = () => {
+      const data = filteredBookings.value.map((booking) => ({
+        Code: booking.code,
+        Email: booking.email,
+        'Phone Number': booking.phoneNumber,
+        Lapangan: booking.lapangan,
+        Harga: booking.harga,
+        'Start Time': formatDateFirestore(booking.startTime),
+        'End Time': formatDateFirestore(booking.endTime),
+      }));
+
+      alasql(
+        'SELECT * INTO XLSX("LAPORAN BOOKING.xlsx",{headers:true}) FROM ?',
+        [data]
+      );
+    };
+
     watch(
       () => bookingForm.value?.dialog,
       (newVal) => {
@@ -178,7 +295,20 @@ export default {
       }
     );
 
-    onMounted(fetchBookings);
+    onMounted(async () => {
+      await liveDataStore.fetchLapangan();
+      fetchBookings();
+    });
+
+    const getBadgeColor = (booking: Booking) => {
+      if (new Date(booking.endTime) < new Date()) {
+        return 'red'; // SELESAI
+      } else if (new Date(booking.startTime) > new Date()) {
+        return 'blue'; // AKAN DATANG
+      } else {
+        return 'green'; // BERJALAN
+      }
+    };
 
     return {
       bookings,
@@ -188,6 +318,11 @@ export default {
       isDialogOpen,
       searchQuery,
       filteredBookings,
+      filterSelection,
+      startDateFilter,
+      endDateFilter,
+      exportToExcel,
+      getBadgeColor,
       openNewBookingForm,
       editBooking,
       updateBooking,
@@ -197,6 +332,4 @@ export default {
 };
 </script>
 
-<style>
-/* Add any specific styles for your booking page here */
-</style>
+<style></style>

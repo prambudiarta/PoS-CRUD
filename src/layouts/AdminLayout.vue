@@ -52,6 +52,15 @@
           >Show Booking</q-item
         >
       </q-list>
+
+      <!-- Logout Menu Item -->
+      <q-separator />
+      <q-item clickable v-ripple @click="logOut">
+        <q-item-section>
+          <q-icon name="logout" />
+          Logout
+        </q-item-section>
+      </q-item>
     </q-drawer>
 
     <!-- Page Container -->
@@ -65,6 +74,8 @@
 import { ref, computed } from 'vue';
 import { useQuasar } from 'quasar';
 import { useRouter } from 'vue-router';
+import { getAuth, signOut } from 'firebase/auth';
+import Swal from 'sweetalert2';
 
 export default {
   setup() {
@@ -98,6 +109,34 @@ export default {
       // Perform actions based on menuItem
     };
 
+    const logOut = async () => {
+      // Show confirmation dialog
+      const result = await Swal.fire({
+        title: 'Konfirmasi',
+        text: 'Apakah Anda yakin ingin keluar?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Ya, Keluar',
+        cancelButtonText: 'Batal',
+      });
+
+      // Check if user confirmed
+      if (result.isConfirmed) {
+        try {
+          const auth = getAuth();
+          await signOut(auth);
+
+          // Redirect to the login page after logout
+          router.push({ name: 'login' });
+        } catch (error) {
+          console.error('Error logging out:', error);
+          Swal.fire('Error', 'Terjadi kesalahan saat keluar.', 'error');
+        }
+      }
+    };
+
     return {
       drawer,
       itemMenuExpanded,
@@ -108,6 +147,7 @@ export default {
       toggleOrderMenu,
       toggleBillMenu,
       selectMenu,
+      logOut,
       quasarVersion,
     };
   },

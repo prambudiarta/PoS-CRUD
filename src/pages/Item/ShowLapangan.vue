@@ -41,6 +41,7 @@ import { QTableColumn } from 'quasar';
 import Swal from 'sweetalert2';
 import LapanganForm from 'src/components/LapanganComponent.vue';
 import { useLiveData } from 'src/stores/live-data';
+import { rupiah } from 'src/utils/formatRupiah';
 
 export default {
   components: { LapanganForm },
@@ -66,6 +67,7 @@ export default {
       if (!searchQuery.value) {
         return lapangan.value;
       }
+      console.log(searchQuery.value);
       return lapangan.value.filter((l) =>
         l.nama.toLowerCase().includes(searchQuery.value.toLowerCase())
       );
@@ -88,7 +90,13 @@ export default {
         field: 'deskripsi',
         sortable: true,
       },
-      { name: 'harga', label: 'Harga', field: 'harga', sortable: true },
+      {
+        name: 'harga',
+        label: 'Harga Per Jam',
+        field: 'harga',
+        format: (val) => rupiah(val),
+        sortable: true,
+      },
       {
         name: 'actions',
         label: 'Actions',

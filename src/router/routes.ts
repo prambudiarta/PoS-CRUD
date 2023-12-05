@@ -5,11 +5,20 @@ const routes: RouteRecordRaw[] = [
     path: '/',
     component: () => import('layouts/MainLayoutExample.vue'),
     children: [{ path: '', component: () => import('pages/IndexPage.vue') }],
+    meta: { requiresAuth: true },
   },
   {
     path: '/admin',
+    name: 'dashboard',
     component: () => import('layouts/AdminLayout.vue'),
     children: [{ path: '', component: () => import('pages/IndexPage.vue') }],
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/login',
+    name: 'login',
+    component: () => import('pages/LoginPage.vue'),
+    meta: { public: true },
   },
   {
     path: '/lapangan',
@@ -21,6 +30,7 @@ const routes: RouteRecordRaw[] = [
         component: () => import('pages/item/ShowLapangan.vue'),
       },
     ],
+    meta: { requiresAuth: true },
   },
   {
     path: '/booking',
@@ -32,6 +42,7 @@ const routes: RouteRecordRaw[] = [
         component: () => import('pages/item/ShowBooking.vue'),
       },
     ],
+    meta: { requiresAuth: true },
   },
 
   // Always leave this as last one,

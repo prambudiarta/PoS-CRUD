@@ -14,14 +14,18 @@
   },
   "dependencies": {
     "@quasar/extras": "^1.16.4",
+    "alasql": "^4.2.3",
     "axios": "^1.2.1",
+    "date-fns": "^2.30.0",
     "firebase": "^10.6.0",
     "pinia": "^2.0.11",
+    "qs": "^6.11.2",
     "quasar": "^2.6.0",
     "sweetalert2": "^11.10.1",
     "vue": "^3.0.0",
     "vue-i18n": "^9.2.2",
-    "vue-router": "^4.0.0"
+    "vue-router": "^4.0.0",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@intlify/vite-plugin-vue-i18n": "^3.3.1",

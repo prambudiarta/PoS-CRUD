@@ -5,17 +5,18 @@ import {
   doc,
   getDocs,
   query,
-  Timestamp,
   updateDoc,
   where,
 } from 'firebase/firestore';
 import { defineStore } from 'pinia';
 import { db } from 'src/firebaseConfig';
+import { minionUiSendMail } from 'src/minion/minion_send_email';
 import { Booking, Lapangan } from 'src/types/interfaces';
 import {
   generateUniqueCode,
   isCodeUnique,
 } from 'src/utils/bookingCodeGenerator';
+import formatDateFirestore from 'src/utils/firebaseDateFormatter';
 
 export const useLiveData = defineStore('liveData', {
   state: () => ({
@@ -88,6 +89,7 @@ export const useLiveData = defineStore('liveData', {
         const booking: Booking = {
           id: doc.id,
           code: data.code,
+          harga: data.harga,
           email: data.email,
           endTime: data.endTime, // converting Timestamp to Date
           lapangan: data.lapangan,
@@ -127,6 +129,23 @@ export const useLiveData = defineStore('liveData', {
           return 'This time slot is already booked for the selected lapangan.';
         }
 
+        // Retrieve the harga rate for the selected lapangan
+        const lapanganData = this.lapangan.find(
+          (l) => l.nama === newBooking.lapangan
+        ); // Assuming lapangan ID is used
+        if (!lapanganData) {
+          return 'Lapangan data not found.';
+        } // Implement this function to fetch lapangan data
+        const hargaPerHour = lapanganData.harga;
+
+        // Calculate the booking duration in minutes
+        const durationInMinutes =
+          (endTime.getTime() - startTime.getTime()) / (1000 * 60);
+        const hoursCharged = Math.ceil(durationInMinutes / 60);
+
+        // Calculate the total price
+        const totalPrice = hargaPerHour * hoursCharged;
+
         // Generate a unique code
         let uniqueCode;
         let isUnique = false;
@@ -136,8 +155,15 @@ export const useLiveData = defineStore('liveData', {
           isUnique = await isCodeUnique(uniqueCode);
         }
 
-        const bookingWithCode = { ...newBooking, code: uniqueCode };
+        const bookingWithCode = {
+          ...newBooking,
+          code: uniqueCode,
+          harga: totalPrice,
+        } as Booking;
+
         await addDoc(collection(db, 'bookings'), bookingWithCode);
+
+        this.sendEmail(bookingWithCode, false);
 
         return 'OK';
       } catch (error) {
@@ -176,6 +202,24 @@ export const useLiveData = defineStore('liveData', {
         return 'This time slot is already booked for the selected lapangan.';
       }
 
+      // Retrieve the harga rate for the selected lapangan
+      const lapanganData = this.lapangan.find(
+        (l) => l.nama === updatedBooking.lapangan
+      ); // Assuming lapangan ID is used
+
+      if (!lapanganData) {
+        return 'Lapangan data not found.';
+      } // Implement this function to fetch lapangan data
+      const hargaPerHour = lapanganData.harga;
+
+      // Calculate the booking duration in minutes
+      const durationInMinutes =
+        (endTime.getTime() - startTime.getTime()) / (1000 * 60);
+      const hoursCharged = Math.ceil(durationInMinutes / 60);
+
+      // Calculate the total price
+      const totalPrice = hargaPerHour * hoursCharged;
+
       try {
         const bookingRef = doc(db, 'bookings', updatedBooking.id);
 
@@ -183,12 +227,15 @@ export const useLiveData = defineStore('liveData', {
           code: updatedBooking.code,
           email: updatedBooking.email,
           lapangan: updatedBooking.lapangan,
+          harga: totalPrice,
           phoneNumber: updatedBooking.phoneNumber,
-          startTime: Timestamp.fromDate(startTime), // Convert Date to Firestore Timestamp
-          endTime: Timestamp.fromDate(endTime),
+          startTime: updatedBooking.startTime, // Convert Date to Firestore Timestamp
+          endTime: updatedBooking.endTime,
         };
 
         await updateDoc(bookingRef, updateObject);
+
+        this.sendEmail(updateObject as Booking, true);
 
         const index = this.bookings.findIndex(
           (booking) => booking.id === updatedBooking.id
@@ -198,7 +245,7 @@ export const useLiveData = defineStore('liveData', {
           this.bookings.splice(index, 1, updatedBooking);
         }
 
-        return 'Booking updated successfully.';
+        return 'OK';
       } catch (error) {
         console.error('Error updating booking:', error);
         return 'An error occurred while updating the booking.';
@@ -233,6 +280,47 @@ export const useLiveData = defineStore('liveData', {
       });
 
       return !overlaps;
+    },
+    sendEmail(booking: Booking, isEdit: boolean) {
+      let title = '';
+
+      if (isEdit) {
+        title = 'Konfirmasi Perubahan Jadwal';
+      } else {
+        title = 'Konfirmasi Pemesanan Lapangan';
+      }
+
+      const message = `
+      <div style="font-family: 'Arial', sans-serif; background: #f4f4f4; padding: 10px; text-align: center;">
+        <h2 style="color: #333;">${title}</h2>
+      </div>
+      <div style="margin: 20px;">
+        <p style="margin-bottom: 10px;">Halo ${booking.phoneNumber},</p>
+        <p style="margin-bottom: 10px;">Terima kasih telah melakukan pemesanan lapangan melalui sistem kami. Berikut adalah detail pemesanan Anda:</p>
+        <p style="margin-bottom: 10px;"><strong>Kode Pemesanan:</strong> ${
+          booking.code
+        }</p>
+        <p style="margin-bottom: 10px;"><strong>Nama Lapangan:</strong> ${
+          booking.lapangan
+        }</p>
+        <p style="margin-bottom: 10px;"><strong>Waktu Mulai:</strong> ${formatDateFirestore(
+          booking.startTime
+        )}</p>
+        <p style="margin-bottom: 10px;"><strong>Waktu Selesai:</strong> ${formatDateFirestore(
+          booking.endTime
+        )}</p>
+        <p style="margin-bottom: 10px;"><strong>Total Harga:</strong> Rp${
+          booking.harga
+        }</p>
+        <p style="margin-bottom: 10px;">Harap simpan kode pemesanan ini untuk referensi Anda. Jika Anda memiliki pertanyaan atau perlu melakukan perubahan pada pemesanan Anda, silakan hubungi kami di [Nomor Kontak/Email].</p>
+      </div>
+      <div style="background: #f4f4f4; padding: 10px; text-align: center;">
+        <p>Terima kasih telah memilih layanan kami. Kami berharap Anda memiliki pengalaman yang menyenangkan!</p>
+        <p>Salam hangat,<br>Manajemen Cibabat Park</p>
+      </div>
+    `;
+
+      minionUiSendMail(booking.code, booking.email, message);
     },
   },
 });
