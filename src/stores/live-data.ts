@@ -5,6 +5,7 @@ import {
   doc,
   getDocs,
   query,
+  Timestamp,
   updateDoc,
   where,
 } from 'firebase/firestore';
@@ -84,20 +85,32 @@ export const useLiveData = defineStore('liveData', {
     },
     async fetchBookings() {
       const bookingsSnapshot = await getDocs(collection(db, 'bookings'));
-      this.bookings = bookingsSnapshot.docs.map((doc) => {
-        const data = doc.data();
-        const booking: Booking = {
-          id: doc.id,
-          code: data.code,
-          harga: data.harga,
-          email: data.email,
-          endTime: data.endTime, // converting Timestamp to Date
-          lapangan: data.lapangan,
-          phoneNumber: data.phoneNumber,
-          startTime: data.startTime, // converting Timestamp to Date
-        };
-        return booking;
-      });
+      this.bookings = bookingsSnapshot.docs
+        .map((doc) => {
+          const data = doc.data();
+
+          const startTime =
+            data.startTime instanceof Timestamp
+              ? data.startTime.toDate()
+              : new Date(data.startTime);
+          const endTime =
+            data.endTime instanceof Timestamp
+              ? data.endTime.toDate()
+              : new Date(data.endTime);
+
+          const booking: Booking = {
+            id: doc.id,
+            code: data.code,
+            harga: data.harga,
+            email: data.email,
+            endTime: endTime, // Convert Firestore Timestamp to JavaScript Date
+            lapangan: data.lapangan,
+            phoneNumber: data.phoneNumber,
+            startTime: startTime, // Convert Firestore Timestamp to JavaScript Date
+          };
+          return booking;
+        })
+        .sort((a, b) => b.startTime.getTime() - a.startTime.getTime()); // Sort bookings by startTime, newest first
     },
     async saveBooking(
       newBooking: Omit<Booking, 'id' | 'code'>

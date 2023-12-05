@@ -13,7 +13,7 @@
 
         <q-toolbar-title> Reservasi Lapangan </q-toolbar-title>
 
-        <div>Quasar v{{ quasarVersion }}</div>
+        <div>Powered By Smartven @ 2024</div>
       </q-toolbar>
     </q-header>
 
@@ -58,8 +58,8 @@
       <q-item clickable v-ripple @click="logOut">
         <q-item-section>
           <q-icon name="logout" />
-          Logout
         </q-item-section>
+        <q-item-section> Logout </q-item-section>
       </q-item>
     </q-drawer>
 
