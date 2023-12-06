@@ -1,24 +1,38 @@
 <template>
-  <q-layout>
+  <q-layout view="hHh lpR fFf" class="bg-login">
     <q-page-container>
       <q-page class="flex flex-center">
-        <q-card>
+        <q-card class="login-card" raised>
           <q-card-section>
-            <div class="text-h6" style="text-align: center">
-              Login to Your Account
-            </div>
-            <q-input filled v-model="user.email" label="Email" type="email" />
+            <div class="text-h5 text-center q-mb-md">Login to Your Account</div>
+
+            <q-input
+              filled
+              v-model="user.email"
+              label="Email"
+              type="email"
+              dense
+              class="q-mb-md"
+              placeholder="Enter your email"
+            />
+
             <q-input
               filled
               v-model="user.password"
               label="Password"
               type="password"
+              dense
+              class="q-mb-md"
+              placeholder="Enter your password"
+              @keyup.enter="login"
             />
+
             <q-btn
               label="Login"
               color="primary"
               @click="login"
-              class="full-width q-mt-md"
+              class="full-width"
+              size="lg"
             />
           </q-card-section>
         </q-card>
@@ -78,3 +92,23 @@ export default {
   },
 };
 </script>
+
+<style>
+.bg-login {
+  background-image: url('path_to_your_background_image');
+  background-size: cover;
+  background-position: center;
+}
+
+.login-card {
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+@media (max-width: 600px) {
+  .login-card {
+    max-width: 350px;
+  }
+}
+</style>
