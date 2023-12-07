@@ -1,7 +1,7 @@
 const API_CMS = 'http://127.0.0.1:8000';
 export const TIMEOUT_DEFAULT = 50000;
 export const TOKEN_CMS =
-  'eafe86722895702a8218e28ca2a46190426a7c970586a83a89f94e2e8cfcc5e9';
+  'c9eaa2427a26fa2303c217c056d0127498e50c5e2e137a992f80c88151d10111';
 
 export const MAIL_API = `${API_CMS}/api/new_mail/message`;
 

@@ -40,7 +40,7 @@
           />
           <q-input
             v-model="searchQuery"
-            placeholder="Code"
+            placeholder="Booking Code"
             style="width: 200px"
           />
         </div>
@@ -172,7 +172,7 @@ export default {
       {
         name: 'code',
         required: true,
-        label: 'Code',
+        label: 'Booking Code',
         align: 'left',
         field: 'code',
         sortable: true,
@@ -269,7 +269,32 @@ export default {
       });
     };
 
-    const exportToExcel = () => {
+    const exportToExcel = async () => {
+      if (
+        filterSelection.value === '' ||
+        startDateFilter.value === '' ||
+        endDateFilter.value === '' ||
+        searchQuery.value === ''
+      ) {
+        const result = await Swal.fire({
+          title: 'Konfirmasi',
+          text: 'Apakah Anda Ingin Download Tanpa Filter?',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#3085d6',
+          cancelButtonColor: '#d33',
+          confirmButtonText: 'Ya',
+          cancelButtonText: 'Batal',
+        });
+        if (result.isConfirmed) {
+          return downloadData();
+        }
+      } else {
+        downloadData();
+      }
+    };
+
+    function downloadData() {
       const data = filteredBookings.value.map((booking) => ({
         Code: booking.code,
         Email: booking.email,
@@ -284,7 +309,7 @@ export default {
         'SELECT * INTO XLSX("LAPORAN BOOKING.xlsx",{headers:true}) FROM ?',
         [data]
       );
-    };
+    }
 
     watch(
       () => bookingForm.value?.dialog,
