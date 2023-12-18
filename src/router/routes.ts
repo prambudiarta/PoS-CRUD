@@ -30,7 +30,7 @@ const routes: RouteRecordRaw[] = [
         component: () => import('pages/item/ShowLapangan.vue'),
       },
     ],
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, role: ['Customer Service', 'Manager'] },
   },
   {
     path: '/booking',
@@ -44,7 +44,20 @@ const routes: RouteRecordRaw[] = [
     ],
     meta: { requiresAuth: true },
   },
-
+  {
+    path: '/user-management',
+    component: () => import('layouts/AdminLayout.vue'),
+    children: [
+      {
+        path: '',
+        name: 'showUser',
+        component: () => import('pages/User/ShowUsers.vue'),
+      },
+      { path: 'create', component: () => import('pages/User/CreateUser.vue') },
+      { path: 'edit/:id', component: () => import('pages/User/EditUser.vue') },
+    ],
+    meta: { requiresAuth: true, role: 'Manager' },
+  },
   // Always leave this as last one,
   // but you can also remove it
   {

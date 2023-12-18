@@ -4,7 +4,9 @@
       <q-page class="flex flex-center">
         <q-card class="login-card" raised>
           <q-card-section>
-            <div class="text-h5 text-center q-mb-md">Login to Your Account</div>
+            <div class="text-h5 text-center q-mb-md">
+              Sistem Reservasi Cibabat Park
+            </div>
 
             <q-input
               filled
@@ -46,6 +48,9 @@ import { ref } from 'vue';
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 import { useRouter } from 'vue-router';
 import Swal from 'sweetalert2';
+import { db } from 'src/firebaseConfig';
+import { doc, getDoc } from 'firebase/firestore';
+import { useUserStore } from 'src/stores/user-store';
 
 export default {
   setup() {
@@ -57,16 +62,53 @@ export default {
 
     const login = async () => {
       try {
+        Swal.fire({
+          title: 'Processing...',
+          text: 'Please wait.',
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading();
+          },
+        });
         const auth = getAuth();
-        await signInWithEmailAndPassword(
+        const userCredential = await signInWithEmailAndPassword(
           auth,
           user.value.email,
           user.value.password
         );
 
-        // Handle redirection after successful login
+        // Fetch user data from Firestore
+        const userDocRef = doc(db, 'users', userCredential.user.uid);
+        const userDoc = await getDoc(userDocRef);
+
+        // Set user data in store
+        const userStore = useUserStore();
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          userStore.setUser({
+            id: userCredential.user.uid,
+            email: userData.email,
+            role: userData.role,
+          });
+        } else {
+          // If user data does not exist in Firestore, treat as super admin
+
+          if (user.value.email === 'dev@ritramd.id') {
+            userStore.setUser({
+              id: userCredential.user.uid,
+              email: user.value.email,
+              role: 'Manager',
+            });
+          } else {
+            throw Error('User Sudah Dihapus!');
+          }
+        }
+
+        // Redirect based on role
+        Swal.close();
         router.push('/admin');
       } catch (error) {
+        Swal.close();
         console.error('Error logging in: ', error);
 
         let errorMessage = 'Login failed. Please try again.';
@@ -95,7 +137,7 @@ export default {
 
 <style>
 .bg-login {
-  background-image: url('path_to_your_background_image');
+  background-image: url('https://ultimatesport.co.id/wp-content/uploads/2018/07/2-1280x720.jpg');
   background-size: cover;
   background-position: center;
 }

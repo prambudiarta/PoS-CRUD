@@ -24,3 +24,9 @@ export interface Booking {
   phoneNumber: string;
   startTime: Date;
 }
+
+export interface User {
+  id?: string;
+  email: string;
+  role: string;
+}

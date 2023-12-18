@@ -2,7 +2,7 @@
   <q-page padding>
     <div class="flex justify-between row q-mb-md">
       <!-- Actions Section -->
-      <div class="flex column q-mr-md">
+      <div class="flex column q-mr-md" v-if="!isCommunity">
         <div class="text-h6 q-mb-md">Actions</div>
         <q-btn
           label="Create Booking"
@@ -60,10 +60,17 @@
           </div>
         </q-td>
       </template>
-      <template v-slot:body-cell-actions="props">
+      <template v-slot:body-cell-actions="props" v-if="!isCommunity">
         <q-td :props="props">
           <q-btn flat icon="edit" @click="editBooking(props.row)" />
           <q-btn flat icon="delete" @click="deleteBooking(props.row)" />
+        </q-td>
+      </template>
+
+      <template v-slot:body-cell-actions="props" v-else>
+        <q-td :props="props">
+          <q-btn flat icon="edit" @click="editBooking(props.row)" disable />
+          <q-btn flat icon="delete" @click="deleteBooking(props.row)" disable />
         </q-td>
       </template>
     </q-table>
@@ -89,6 +96,7 @@ import formatDateFirestore from 'src/utils/firebaseDateFormatter';
 import alasql from 'alasql';
 import * as XLSX from 'xlsx';
 import { rupiah } from 'src/utils/formatRupiah';
+import { useUserStore } from 'src/stores/user-store';
 
 export default {
   components: { BookingForm },
@@ -111,6 +119,9 @@ export default {
     const filterSelection = ref('SEMUA');
     const startDateFilter = ref('');
     const endDateFilter = ref('');
+    const isCommunity = ref(true);
+
+    const userStore = useUserStore();
 
     const openNewBookingForm = () => {
       console.log('open booking');
@@ -271,11 +282,13 @@ export default {
 
     const exportToExcel = async () => {
       if (
-        filterSelection.value === '' ||
-        startDateFilter.value === '' ||
-        endDateFilter.value === '' ||
-        searchQuery.value === ''
+        filterSelection.value !== 'SEMUA' ||
+        startDateFilter.value ||
+        endDateFilter.value ||
+        searchQuery.value
       ) {
+        downloadData();
+      } else {
         const result = await Swal.fire({
           title: 'Konfirmasi',
           text: 'Apakah Anda Ingin Download Tanpa Filter?',
@@ -289,8 +302,6 @@ export default {
         if (result.isConfirmed) {
           return downloadData();
         }
-      } else {
-        downloadData();
       }
     };
 
@@ -322,6 +333,9 @@ export default {
 
     onMounted(async () => {
       await liveDataStore.fetchLapangan();
+      if (userStore.currentUser.role !== 'Community') {
+        isCommunity.value = false;
+      }
       fetchBookings();
     });
 
@@ -336,6 +350,7 @@ export default {
     };
 
     return {
+      isCommunity,
       bookings,
       columns,
       bookingForm,

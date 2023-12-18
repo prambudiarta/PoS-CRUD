@@ -19,7 +19,7 @@
 
     <!-- Sidebar -->
     <q-drawer show-if-above v-model="drawer" side="left" bordered>
-      <q-list>
+      <q-list v-if="!isCommunity">
         <!-- Item Menu -->
         <q-item clickable v-ripple @click="toggleItemMenu">
           <q-item-section>Lapangan</q-item-section>
@@ -35,7 +35,9 @@
           @click="selectMenu('LapanganShow')"
           >Show Lapangan</q-item
         >
+      </q-list>
 
+      <q-list>
         <!-- Order Menu -->
         <q-item clickable v-ripple @click="toggleOrderMenu">
           <q-item-section>Booking</q-item-section>
@@ -50,8 +52,12 @@
           v-ripple
           @click="selectMenu('BookingShow')"
           >Show Booking</q-item
-        >
-      </q-list>
+        ></q-list
+      >
+
+      <q-item v-if="isManager" clickable v-ripple @click="userManagement">
+        <q-item-section> Cek User </q-item-section>
+      </q-item>
 
       <!-- Logout Menu Item -->
       <q-separator />
@@ -59,7 +65,7 @@
         <q-item-section>
           <q-icon name="logout" />
         </q-item-section>
-        <q-item-section> Logout </q-item-section>
+        <q-item-section> LOGOUT </q-item-section>
       </q-item>
     </q-drawer>
 
@@ -71,11 +77,12 @@
 </template>
 
 <script lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useQuasar } from 'quasar';
 import { useRouter } from 'vue-router';
 import { getAuth, signOut } from 'firebase/auth';
 import Swal from 'sweetalert2';
+import { useUserStore } from 'src/stores/user-store';
 
 export default {
   setup() {
@@ -83,10 +90,25 @@ export default {
     const itemMenuExpanded = ref(false);
     const orderMenuExpanded = ref(false);
     const billMenuExpanded = ref(false);
+    const isManager = ref(false);
+    const isCommunity = ref(false);
     const router = useRouter();
 
     const $q = useQuasar();
     const quasarVersion = computed(() => $q.version);
+
+    const userStore = useUserStore();
+
+    onMounted(() => {
+      if (userStore.currentUser.role === 'Community') {
+        isCommunity.value = true;
+      } else if (
+        userStore.currentUser.role === 'Manager' ||
+        userStore.currentUser.role === 'super-admin'
+      ) {
+        isManager.value = true;
+      }
+    });
 
     const toggleLeftDrawer = () => {
       drawer.value = !drawer.value;
@@ -109,6 +131,11 @@ export default {
       // Perform actions based on menuItem
     };
 
+    const userManagement = () => {
+      router.push({ name: 'showUser' });
+      // Perform actions based on menuItem
+    };
+
     const logOut = async () => {
       // Show confirmation dialog
       const result = await Swal.fire({
@@ -127,7 +154,7 @@ export default {
         try {
           const auth = getAuth();
           await signOut(auth);
-
+          userStore.clearUser();
           // Redirect to the login page after logout
           router.push({ name: 'login' });
         } catch (error) {
@@ -147,8 +174,11 @@ export default {
       toggleOrderMenu,
       toggleBillMenu,
       selectMenu,
+      userManagement,
       logOut,
       quasarVersion,
+      isManager,
+      isCommunity,
     };
   },
 };

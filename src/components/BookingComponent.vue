@@ -20,28 +20,41 @@
         <q-input v-model="localBooking.email" label="Email" />
         <q-input v-model="localBooking.phoneNumber" label="Nomor HP" />
 
-        <!-- Start Date and Time Picker (native HTML5) -->
-        <div class="q-mb-md">
-          <label for="start-datetime">Start Date and Time:</label>
-          <input
-            type="datetime-local"
-            id="start-datetime"
-            v-model="localBooking.startTime"
-            class="q-ml-sm"
-          />
+        <div class="q-pa-md">
+          <div class="q-pa-md">
+            <q-badge color="primary" class="badge-large">Waktu Mulai</q-badge>
+          </div>
+
+          <div class="q-gutter-md row items-start">
+            <q-date
+              v-model="startDate"
+              today-btn
+              :navigation-min-year-month="minYearMonth"
+            >
+            </q-date>
+
+            <q-time v-model="startTime" format24h :minute-options="timeOptions">
+            </q-time>
+          </div>
         </div>
 
-        <!-- End Date and Time Picker (native HTML5) -->
-        <div class="q-mb-md">
-          <label for="end-datetime">End Date and Time:</label>
-          <input
-            type="datetime-local"
-            id="end-datetime"
-            v-model="localBooking.endTime"
-            class="q-ml-sm"
-          />
+        <div class="q-pa-md">
+          <div class="q-pa-md">
+            <q-badge color="primary" class="badge-large">Waktu Selesai</q-badge>
+          </div>
+
+          <div class="q-gutter-md row items-start">
+            <q-date
+              v-model="endDate"
+              today-btn
+              :navigation-min-year-month="minYearMonth"
+            >
+            </q-date>
+
+            <q-time v-model="endTime" format24h :minute-options="timeOptions">
+            </q-time>
+          </div>
         </div>
-        <!-- Add other fields as needed for booking -->
       </q-card-section>
 
       <q-card-actions align="right">
@@ -69,6 +82,12 @@ export default {
     const isEditMode = computed(() => props.booking && props.booking.id);
     const liveDataStore = useLiveData();
     const lapanganOptions = ref([]);
+    const timeOptions = [0, 30];
+
+    const startDate = ref('');
+    const endDate = ref('');
+    const startTime = ref('');
+    const endTime = ref('');
 
     watch(isOpen, (newValue) => {
       dialog.value = newValue;
@@ -91,7 +110,14 @@ export default {
 
     const saveBooking = async () => {
       try {
+        localBooking.value.startTime = new Date(
+          `${startDate.value}T${startTime.value}`.replace(/\//g, '-')
+        );
+        localBooking.value.endTime = new Date(
+          `${endDate.value}T${endTime.value}`.replace(/\//g, '-')
+        );
         let result = '';
+
         if (isEditMode.value) {
           // Existing booking: update it
           result = await liveDataStore.updateBooking(localBooking.value);
@@ -107,16 +133,23 @@ export default {
         } else {
           dialog.value = false;
           emit('save');
-          Swal.fire('Error', result, 'error');
+          Swal.fire('Warning', result, 'warning');
         }
 
         // Close the dialog and emit an event to refresh the bookings list
-        // window.location.reload();
+        emit('save');
       } catch (error) {
         console.error('Error saving booking:', error);
         // Handle the error, e.g., show a notification to the user
       }
     };
+
+    const minYearMonth = computed(() => {
+      const today = new Date();
+      const year = today.getFullYear();
+      const month = String(today.getMonth() + 1).padStart(2, '0'); // Month is 0-indexed
+      return `${year}/${month}`;
+    });
 
     onMounted(async () => {
       await liveDataStore.fetchLapangan();
@@ -128,17 +161,21 @@ export default {
       localBooking,
       isEditMode,
       lapanganOptions,
+      startTime,
+      endTime,
+      startDate,
+      endDate,
+      timeOptions,
+      minYearMonth,
       saveBooking,
     };
   },
 };
 </script>
 
-<style>
-/* ... your styles ... */
-
-/* Ensure the dialog content can scroll if it's too tall for the viewport */
-.q-dialog .q-card {
-  overflow-y: auto;
+<style scoped>
+.badge-large {
+  font-size: 1.2em; /* Adjust the font size as needed */
+  padding: 0.5em 1em; /* Adjust padding for larger badge size */
 }
 </style>
