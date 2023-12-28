@@ -21,6 +21,33 @@ const routes: RouteRecordRaw[] = [
     meta: { public: true },
   },
   {
+    path: '/item',
+    component: () => import('layouts/AdminLayout.vue'),
+    children: [
+      {
+        path: 'create', // Removed the leading '/'
+        name: 'ItemCreate',
+        component: () => import('pages/item/CreateItem.vue'),
+      },
+      {
+        path: 'show', // Removed the leading '/'
+        name: 'ItemShow',
+        component: () => import('pages/item/ShowItem.vue'),
+      },
+    ],
+  },
+  {
+    path: '/category',
+    component: () => import('layouts/AdminLayout.vue'),
+    children: [
+      {
+        path: 'show', // Removed the leading '/'
+        name: 'categoryShow',
+        component: () => import('pages/item/ShowCategories.vue'),
+      },
+    ],
+  },
+  {
     path: '/lapangan',
     component: () => import('layouts/AdminLayout.vue'),
     children: [

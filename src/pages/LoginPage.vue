@@ -4,9 +4,7 @@
       <q-page class="flex flex-center">
         <q-card class="login-card" raised>
           <q-card-section>
-            <div class="text-h5 text-center q-mb-md">
-              Sistem Reservasi Cibabat Park
-            </div>
+            <div class="text-h5 text-center q-mb-md">Karaoke PoS System</div>
 
             <q-input
               filled
@@ -93,7 +91,7 @@ export default {
         } else {
           // If user data does not exist in Firestore, treat as super admin
 
-          if (user.value.email === 'dev@ritramd.id') {
+          if (user.value.email === 'prambudiarta@gmail.com') {
             userStore.setUser({
               id: userCredential.user.uid,
               email: user.value.email,

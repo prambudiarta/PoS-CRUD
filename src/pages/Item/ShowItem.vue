@@ -123,7 +123,7 @@ export default {
 
     const updateItem = async (item: Item) => {
       // Call the store method to update the item
-      await itemStore.updateItem(item);
+      await itemStore.updateItem(item, null);
       // Refresh items list or handle UI update here
     };
 

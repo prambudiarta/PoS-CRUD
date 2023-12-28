@@ -3,13 +3,14 @@
 import { defineStore } from 'pinia';
 import { db } from 'src/firebaseConfig';
 import { collection, addDoc, getDocs } from 'firebase/firestore';
-import { Item } from 'src/types/interfaces';
+import { Categories, Item } from 'src/types/interfaces';
 import uploadImage from 'src/utils/uploadImages';
 import { doc, deleteDoc, updateDoc } from 'firebase/firestore';
 
 export const useItemStore = defineStore('itemStore', {
   state: () => ({
     items: [] as Item[],
+    categories: [] as Categories[],
   }),
   getters: {
     // Define any getters here
@@ -73,6 +74,53 @@ export const useItemStore = defineStore('itemStore', {
       const index = this.items.findIndex((item) => item.id === updatedItem.id);
       if (index !== -1) {
         this.items[index] = updatedItem;
+      }
+    },
+    async fetchCategories() {
+      const querySnapshot = await getDocs(collection(db, 'categories'));
+      this.categories = querySnapshot.docs.map((doc) => {
+        const data = doc.data();
+        // Ensure that the data conforms to the Item type
+        const categories: Categories = {
+          id: doc.id,
+          category: data.category,
+        };
+        return categories;
+      });
+    },
+    async saveCategory(category: Omit<Categories, 'id'>) {
+      const docRef = await addDoc(collection(db, 'categories'), {
+        ...category,
+      });
+
+      this.categories.push({ id: docRef.id, ...category });
+    },
+    async deleteCategoriy(categoryId: string) {
+      await deleteDoc(doc(db, 'categories', categoryId));
+      // Optionally, you could also remove the item from the local 'items' array
+      this.categories = this.categories.filter(
+        (category) => category.id !== categoryId
+      );
+    },
+    async updateCategory(updatedCategory: Categories) {
+      if (!updatedCategory.id) {
+        throw new Error('Category must have an ID for updating');
+      }
+
+      const categoryRef = doc(db, 'categories', updatedCategory.id);
+
+      const updateObject = {
+        category: updatedCategory.category,
+      };
+
+      await updateDoc(categoryRef, updateObject);
+
+      // Optionally, update the item in the local 'items' array
+      const index = this.categories.findIndex(
+        (item) => item.id === updatedCategory.id
+      );
+      if (index !== -1) {
+        this.categories[index] = updatedCategory;
       }
     },
   },

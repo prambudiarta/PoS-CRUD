@@ -6,13 +6,12 @@ import { getStorage } from 'firebase/storage';
 
 // Your web app's Firebase configuration (replace with your own config)
 const firebaseConfig = {
-  apiKey: 'AIzaSyDTf_tw6NKIVFefraP6WfVzL9bADxGrRj8',
-  authDomain: 'smartven-testing.firebaseapp.com',
-  projectId: 'smartven-testing',
-  storageBucket: 'smartven-testing.appspot.com',
-  messagingSenderId: '355653422380',
-  appId: '1:355653422380:web:b638369c0a21a30921f089',
-  measurementId: 'G-HTSFJSQMCW',
+  apiKey: 'AIzaSyDpFkRTO8zUYmXiOGjzrBKNCFHPW0Ad0rU',
+  authDomain: 'karaoke-pos.firebaseapp.com',
+  projectId: 'karaoke-pos',
+  storageBucket: 'karaoke-pos.appspot.com',
+  messagingSenderId: '590803726251',
+  appId: '1:590803726251:web:70dde7415d2212efe2acee',
 };
 
 // Initialize Firebase

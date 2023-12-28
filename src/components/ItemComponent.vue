@@ -80,6 +80,9 @@ export default {
       fileInput.value.click();
     };
 
+    console.log('props item');
+    console.log(props);
+
     const handleFileChange = () => {
       if (fileInput.value && fileInput.value.files.length > 0) {
         file.value = fileInput.value.files[0];
@@ -128,7 +131,7 @@ export default {
 
         // Close the dialog and refresh the items list
         dialog.value = false;
-        await itemStore.fetchItems();
+        emit('save');
       } catch (error) {
         console.error('Error saving item:', error);
         // Handle the error, e.g., show a notification to the user

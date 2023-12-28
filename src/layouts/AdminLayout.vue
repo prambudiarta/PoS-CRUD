@@ -11,9 +11,9 @@
           @click="toggleLeftDrawer"
         />
 
-        <q-toolbar-title> Reservasi Lapangan </q-toolbar-title>
+        <q-toolbar-title> Dashboard </q-toolbar-title>
 
-        <div>Powered By Smartven @ 2024</div>
+        <div>Powered By Galih @ 2024</div>
       </q-toolbar>
     </q-header>
 
@@ -22,7 +22,7 @@
       <q-list v-if="!isCommunity">
         <!-- Item Menu -->
         <q-item clickable v-ripple @click="toggleItemMenu">
-          <q-item-section>Lapangan</q-item-section>
+          <q-item-section>Menu</q-item-section>
           <q-item-section side>
             <q-icon :name="itemMenuExpanded ? 'expand_less' : 'expand_more'" />
           </q-item-section>
@@ -32,28 +32,44 @@
           v-if="itemMenuExpanded"
           clickable
           v-ripple
-          @click="selectMenu('LapanganShow')"
-          >Show Lapangan</q-item
+          @click="selectMenu('categoryShow')"
+          >Manage Categories</q-item
+        >
+        <q-item
+          v-if="itemMenuExpanded"
+          clickable
+          v-ripple
+          @click="selectMenu('ItemShow')"
+          >Manage Item</q-item
         >
       </q-list>
 
-      <q-list>
-        <!-- Order Menu -->
-        <q-item clickable v-ripple @click="toggleOrderMenu">
-          <q-item-section>Booking</q-item-section>
+      <q-list v-if="!isCommunity">
+        <!-- Item Menu -->
+        <q-item clickable v-ripple @click="toggleDeviceMenu">
+          <q-item-section>Devices</q-item-section>
           <q-item-section side>
-            <q-icon :name="orderMenuExpanded ? 'expand_less' : 'expand_more'" />
+            <q-icon
+              :name="deviceMenuExpanded ? 'expand_less' : 'expand_more'"
+            />
           </q-item-section>
         </q-item>
-        <q-separator v-if="orderMenuExpanded" />
+        <q-separator v-if="deviceMenuExpanded" />
         <q-item
-          v-if="orderMenuExpanded"
+          v-if="deviceMenuExpanded"
           clickable
           v-ripple
-          @click="selectMenu('BookingShow')"
-          >Show Booking</q-item
-        ></q-list
-      >
+          @click="selectMenu('ItemShow')"
+          >Manage Room</q-item
+        >
+        <q-item
+          v-if="deviceMenuExpanded"
+          clickable
+          v-ripple
+          @click="selectMenu('ItemShow')"
+          >Manage Printer</q-item
+        >
+      </q-list>
 
       <q-item v-if="isManager" clickable v-ripple @click="userManagement">
         <q-item-section> Cek User </q-item-section>
@@ -88,7 +104,7 @@ export default {
   setup() {
     const drawer = ref(false);
     const itemMenuExpanded = ref(false);
-    const orderMenuExpanded = ref(false);
+    const deviceMenuExpanded = ref(false);
     const billMenuExpanded = ref(false);
     const isManager = ref(false);
     const isCommunity = ref(false);
@@ -118,8 +134,8 @@ export default {
       itemMenuExpanded.value = !itemMenuExpanded.value;
     };
 
-    const toggleOrderMenu = () => {
-      orderMenuExpanded.value = !orderMenuExpanded.value;
+    const toggleDeviceMenu = () => {
+      deviceMenuExpanded.value = !deviceMenuExpanded.value;
     };
 
     const toggleBillMenu = () => {
@@ -167,11 +183,11 @@ export default {
     return {
       drawer,
       itemMenuExpanded,
-      orderMenuExpanded,
+      deviceMenuExpanded,
       billMenuExpanded,
       toggleLeftDrawer,
       toggleItemMenu,
-      toggleOrderMenu,
+      toggleDeviceMenu,
       toggleBillMenu,
       selectMenu,
       userManagement,
