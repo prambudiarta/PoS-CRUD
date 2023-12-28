@@ -91,13 +91,6 @@ export default {
         sortable: true,
       },
       {
-        name: 'harga',
-        label: 'Harga Per Jam',
-        field: 'harga',
-        format: (val) => rupiah(val),
-        sortable: true,
-      },
-      {
         name: 'actions',
         label: 'Actions',
         field: 'action',

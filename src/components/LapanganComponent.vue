@@ -11,7 +11,6 @@
         <!-- Form for lapangan data -->
         <q-input v-model="localLapangan.nama" label="Nama" />
         <q-input v-model="localLapangan.deskripsi" label="Deskripsi" />
-        <q-input v-model="localLapangan.harga" label="Harga" type="number" />
         <!-- Add other fields as needed for lapangan -->
       </q-card-section>
 

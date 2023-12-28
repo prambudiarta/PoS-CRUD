@@ -17,6 +17,14 @@
           emit-value
           map-options
         />
+        <q-select
+          filled
+          v-model="localBooking.olahraga"
+          :options="olahragaOptions"
+          label="Olahraga"
+          emit-value
+          map-options
+        />
         <q-input v-model="localBooking.email" label="Email" />
         <q-input v-model="localBooking.phoneNumber" label="Nomor HP" />
 
@@ -82,6 +90,7 @@ export default {
     const isEditMode = computed(() => props.booking && props.booking.id);
     const liveDataStore = useLiveData();
     const lapanganOptions = ref([]);
+    const olahragaOptions = ref([]);
     const timeOptions = [0, 30];
 
     const startDate = ref('');
@@ -107,6 +116,29 @@ export default {
         value: doc.nama,
       }));
     };
+
+    const updateOlahragaOption = async () => {
+      // Find the selected lapangan in the liveDataStore
+      const selectedLapangan = liveDataStore.lapangan.find(
+        (lapangan) => lapangan.nama === localBooking.value.lapangan
+      );
+
+      // Check if the selected lapangan has olahraga data
+      if (selectedLapangan && selectedLapangan.olahraga) {
+        // Map the olahraga object to an array of options for the q-select component
+        olahragaOptions.value = Object.keys(selectedLapangan.olahraga).map(
+          (key) => ({
+            label: key.toUpperCase(), // The name of the sport
+            value: key, // The price of the sport
+          })
+        );
+      } else {
+        // If no olahraga data is found, clear the options
+        olahragaOptions.value = [];
+      }
+    };
+
+    watch(() => localBooking.value.lapangan, updateOlahragaOption);
 
     const saveBooking = async () => {
       try {
@@ -161,12 +193,14 @@ export default {
       localBooking,
       isEditMode,
       lapanganOptions,
+      olahragaOptions,
       startTime,
       endTime,
       startDate,
       endDate,
       timeOptions,
       minYearMonth,
+      updateOlahragaOption,
       saveBooking,
     };
   },

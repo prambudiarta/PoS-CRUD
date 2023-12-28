@@ -35,9 +35,10 @@ export const useLiveData = defineStore('liveData', {
         const lapangan: Lapangan = {
           id: doc.id,
           nama: data.nama,
-          harga: data.harga,
+          olahraga: data.olahraga,
           deskripsi: data.deskripsi, // This field might be optional
         };
+        console.log(this.lapangan);
         return lapangan;
       });
     },
@@ -58,7 +59,6 @@ export const useLiveData = defineStore('liveData', {
       const updateObject = {
         nama: updatedLapangan.nama,
         deskripsi: updatedLapangan.deskripsi,
-        harga: updatedLapangan.harga,
       };
 
       await updateDoc(lapanganRef, updateObject);
@@ -101,6 +101,7 @@ export const useLiveData = defineStore('liveData', {
           const booking: Booking = {
             id: doc.id,
             code: data.code,
+            olahraga: data.olahraga,
             harga: data.harga,
             email: data.email,
             endTime: endTime, // Convert Firestore Timestamp to JavaScript Date
@@ -149,9 +150,13 @@ export const useLiveData = defineStore('liveData', {
         if (!lapanganData) {
           return 'Lapangan data not found.';
         } // Implement this function to fetch lapangan data
-        const hargaPerHour = lapanganData.harga;
 
-        // Calculate the booking duration in minutes
+        const hargaPerHour = lapanganData.olahraga[newBooking.olahraga];
+        if (!hargaPerHour) {
+          return 'Olahraga data not found.';
+        }
+
+        // Calculate the booking duration in  minutes
         const durationInMinutes =
           (endTime.getTime() - startTime.getTime()) / (1000 * 60);
         const hoursCharged = Math.ceil(durationInMinutes / 60);
@@ -223,7 +228,10 @@ export const useLiveData = defineStore('liveData', {
       if (!lapanganData) {
         return 'Lapangan data not found.';
       } // Implement this function to fetch lapangan data
-      const hargaPerHour = lapanganData.harga;
+      const hargaPerHour = lapanganData.olahraga[updatedBooking.olahraga];
+      if (!hargaPerHour) {
+        return 'Olahraga data not found.';
+      }
 
       // Calculate the booking duration in minutes
       const durationInMinutes =
@@ -242,6 +250,7 @@ export const useLiveData = defineStore('liveData', {
           lapangan: updatedBooking.lapangan,
           harga: totalPrice,
           phoneNumber: updatedBooking.phoneNumber,
+          olahraga: updatedBooking.olahraga,
           startTime: updatedBooking.startTime, // Convert Date to Firestore Timestamp
           endTime: updatedBooking.endTime,
         };
@@ -315,6 +324,9 @@ export const useLiveData = defineStore('liveData', {
         }</p>
         <p style="margin-bottom: 10px;"><strong>Nama Lapangan:</strong> ${
           booking.lapangan
+        }</p>
+        <p style="margin-bottom: 10px;"><strong>Olahraga:</strong> ${
+          booking.olahraga
         }</p>
         <p style="margin-bottom: 10px;"><strong>Waktu Mulai:</strong> ${formatDateFirestore(
           booking.startTime

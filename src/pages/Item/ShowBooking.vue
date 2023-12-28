@@ -207,6 +207,13 @@ export default {
         sortable: true,
       },
       {
+        name: 'olahraga',
+        label: 'Olahraga',
+        field: 'olahraga',
+        format: (val) => val.toUpperCase(),
+        sortable: true,
+      },
+      {
         name: 'harga',
         label: 'Harga',
         field: 'harga',

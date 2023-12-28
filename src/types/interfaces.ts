@@ -10,12 +10,13 @@ export interface Lapangan {
   id?: string;
   nama: string;
   deskripsi: string;
-  harga: number;
+  olahraga: Record<string, number>;
 }
 
 export interface Booking {
   id?: string;
   status?: string;
+  olahraga: string;
   harga: number;
   code: string;
   email: string;
