@@ -35,6 +35,7 @@
     <item-form
       ref="itemForm"
       :item="editableItem"
+      :category="categories"
       :isOpen="isDialogOpen"
       @save="updateItem"
     />
@@ -44,7 +45,7 @@
 <script lang="ts">
 import { ref, onMounted, Ref, watch, computed } from 'vue';
 import { useItemStore } from 'src/stores/item-store';
-import { Item } from 'src/types/interfaces';
+import { Categories, Item } from 'src/types/interfaces';
 import { QTableColumn } from 'quasar';
 import Swal from 'sweetalert2';
 import ItemForm from 'src/components/ItemComponent.vue';
@@ -60,6 +61,7 @@ export default {
     const isDialogOpen = ref(false);
     const itemStore = useItemStore();
     const items = ref<Item[]>([]);
+    const categories = ref<Categories[]>([]);
     const itemForm = ref() as Ref<ItemFormComponent | null>;
     const editableItem = ref({});
     const searchQuery = ref('');
@@ -113,6 +115,8 @@ export default {
 
     const fetchItems = async () => {
       await itemStore.fetchItems();
+      await itemStore.fetchCategories();
+      categories.value = itemStore.categories;
       items.value = itemStore.items;
     };
 
@@ -176,6 +180,7 @@ export default {
       isDialogOpen,
       searchQuery,
       filteredItems,
+      categories,
       openNewItemForm,
       editItem,
       updateItem,

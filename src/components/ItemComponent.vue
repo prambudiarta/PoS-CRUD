@@ -13,7 +13,7 @@
         <q-input v-model="localItem.price" label="Price" type="number" />
         <q-select
           v-model="localItem.category"
-          :options="categories"
+          :options="localCategoryOptions"
           label="Category"
         />
 
@@ -62,6 +62,7 @@ import { useItemStore } from 'src/stores/item-store';
 export default {
   props: {
     item: Object,
+    category: Object,
     isOpen: Boolean, // Add this prop for external control
   },
   setup(props, { emit }) {
@@ -74,7 +75,7 @@ export default {
     const fileInput = ref(null);
     const file = ref(null);
     const itemStore = useItemStore();
-    const categories = ref(['Drinks', 'Snacks', 'Main Course', 'Desserts']);
+    const localCategoryOptions = ref([]);
 
     const triggerFileInput = () => {
       fileInput.value.click();
@@ -115,6 +116,23 @@ export default {
       { deep: true }
     );
 
+    watch(
+      () => props.category,
+      (listCategory) => {
+        if (Array.isArray(listCategory)) {
+          // Transforming each category object in the array to the required format
+          localCategoryOptions.value = listCategory.map((cat) => ({
+            label: cat.category,
+            value: cat.id,
+          }));
+        } else {
+          // Resetting to an empty array if the incoming data is not an array
+          localCategoryOptions.value = [];
+        }
+      },
+      { deep: true }
+    );
+
     const saveItem = async () => {
       console.log(fileInput.value);
       try {
@@ -145,7 +163,7 @@ export default {
       selectedImage,
       imagePreviewUrl,
       fileInput,
-      categories,
+      localCategoryOptions,
       triggerFileInput,
       handleFileChange,
       saveItem,
