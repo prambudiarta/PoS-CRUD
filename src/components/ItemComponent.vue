@@ -134,7 +134,7 @@ export default {
     );
 
     const saveItem = async () => {
-      console.log(fileInput.value);
+      localItem.value.category = localItem.value.category.label;
       try {
         if (isEditMode.value) {
           // Existing item: update it

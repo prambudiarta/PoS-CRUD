@@ -2,7 +2,7 @@
   "name": "pos",
   "version": "0.0.1",
   "description": "A Quasar Project",
-  "productName": "Cibabat Park",
+  "productName": "CRUD Admin",
   "author": "Galih Prambudiarta <42970402+prambudiarta@users.noreply.github.com>",
   "private": true,
   "scripts": {

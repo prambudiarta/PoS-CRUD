@@ -48,6 +48,28 @@ const routes: RouteRecordRaw[] = [
     ],
   },
   {
+    path: '/room',
+    component: () => import('layouts/AdminLayout.vue'),
+    children: [
+      {
+        path: 'show', // Removed the leading '/'
+        name: 'roomShow',
+        component: () => import('pages/item/ShowRoom.vue'),
+      },
+    ],
+  },
+  {
+    path: '/printer',
+    component: () => import('layouts/AdminLayout.vue'),
+    children: [
+      {
+        path: 'show', // Removed the leading '/'
+        name: 'printerShow',
+        component: () => import('pages/item/ShowPrinter.vue'),
+      },
+    ],
+  },
+  {
     path: '/lapangan',
     component: () => import('layouts/AdminLayout.vue'),
     children: [

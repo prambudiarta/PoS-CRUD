@@ -38,6 +38,7 @@ export interface Room {
   id: string;
   price: number;
   description: string;
+  isAvailable: boolean;
 }
 
 export interface Printer {

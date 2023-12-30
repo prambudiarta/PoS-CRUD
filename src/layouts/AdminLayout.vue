@@ -59,14 +59,14 @@
           v-if="deviceMenuExpanded"
           clickable
           v-ripple
-          @click="selectMenu('ItemShow')"
+          @click="selectMenu('roomShow')"
           >Manage Room</q-item
         >
         <q-item
           v-if="deviceMenuExpanded"
           clickable
           v-ripple
-          @click="selectMenu('ItemShow')"
+          @click="selectMenu('printerShow')"
           >Manage Printer</q-item
         >
       </q-list>
