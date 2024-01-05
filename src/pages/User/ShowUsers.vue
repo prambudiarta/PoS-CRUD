@@ -85,7 +85,7 @@ export default {
     const roles = ref([
       { label: 'Manager', value: 'Manager' },
       { label: 'Customer Service', value: 'Customer Service' },
-      { label: 'Community', value: 'Community' },
+      { label: 'Kasir', value: 'Kasir' },
     ]);
 
     const columns = ref([

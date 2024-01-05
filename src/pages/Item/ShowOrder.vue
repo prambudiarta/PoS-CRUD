@@ -241,6 +241,8 @@ export default defineComponent({
         currentOrder.value.orderId,
         currentOrderItems.value
       );
+
+      window.location.reload();
     };
 
     const addItemToOrder = () => {

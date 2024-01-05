@@ -119,7 +119,7 @@ export default {
     const userStore = useUserStore();
 
     onMounted(() => {
-      if (userStore.currentUser.role === 'Community') {
+      if (userStore.currentUser.role === 'Kasir') {
         isCommunity.value = true;
       } else if (
         userStore.currentUser.role === 'Manager' ||
