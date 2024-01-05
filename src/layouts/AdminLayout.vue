@@ -19,6 +19,9 @@
 
     <!-- Sidebar -->
     <q-drawer show-if-above v-model="drawer" side="left" bordered>
+      <q-item clickable v-ripple @click="selectMenu('orderShow')">
+        <q-item-section> Order </q-item-section>
+      </q-item>
       <q-list v-if="!isCommunity">
         <!-- Item Menu -->
         <q-item clickable v-ripple @click="toggleItemMenu">

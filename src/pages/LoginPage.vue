@@ -135,7 +135,7 @@ export default {
 
 <style>
 .bg-login {
-  background-image: url('https://ultimatesport.co.id/wp-content/uploads/2018/07/2-1280x720.jpg');
+  background-image: url('https://wallpapers.com/images/hd/karaoke-background-td0p34xmna8wjn61.jpg');
   background-size: cover;
   background-position: center;
 }

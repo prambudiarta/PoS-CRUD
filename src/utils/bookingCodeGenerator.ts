@@ -10,6 +10,13 @@ export function generateUniqueCode() {
   return result;
 }
 
+export async function isCodeKaraokeUnique(code: string) {
+  const querySnapshot = await getDocs(
+    query(collection(db, 'order'), where('orderId', '==', code))
+  );
+  return querySnapshot.empty;
+}
+
 export async function isCodeUnique(code: string) {
   const querySnapshot = await getDocs(
     query(collection(db, 'bookings'), where('code', '==', code))

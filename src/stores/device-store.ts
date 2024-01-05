@@ -34,6 +34,8 @@ export const useDeviceStore = defineStore('deviceStore', {
         throw new Error('Room ID is not set');
       }
 
+      room.isAvailable = true;
+
       const roomRef = doc(db, 'rooms', room.id);
       await setDoc(roomRef, { ...room });
 

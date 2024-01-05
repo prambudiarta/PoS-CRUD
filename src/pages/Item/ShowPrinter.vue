@@ -19,6 +19,7 @@
       <template v-slot:body-cell-edit="props">
         <q-td :props="props">
           <!-- <q-btn flat icon="edit" @click="editPrinter(props.row)" /> -->
+          <q-btn flat icon="print" @click="testPrinter(props.row.id)" />
           <q-btn flat icon="delete" @click="deletePrinter(props.row)" />
         </q-td>
       </template>
@@ -101,6 +102,10 @@ export default {
       printers.value = deviceStore.printers;
     };
 
+    const testPrinter = async (printerId: string) => {
+      console.log(printerId);
+    };
+
     const editCategory = (printer: Printer) => {
       editablePrinter.value = printer;
       isDialogOpen.value = true;
@@ -161,6 +166,7 @@ export default {
       isDialogOpen,
       searchQuery,
       filteredCategory,
+      testPrinter,
       openNewCategoryForm,
       editCategory,
       updatePrinter,

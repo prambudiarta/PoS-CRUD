@@ -70,6 +70,17 @@ const routes: RouteRecordRaw[] = [
     ],
   },
   {
+    path: '/order',
+    component: () => import('layouts/AdminLayout.vue'),
+    children: [
+      {
+        path: 'show', // Removed the leading '/'
+        name: 'orderShow',
+        component: () => import('pages/item/ShowOrder.vue'),
+      },
+    ],
+  },
+  {
     path: '/lapangan',
     component: () => import('layouts/AdminLayout.vue'),
     children: [

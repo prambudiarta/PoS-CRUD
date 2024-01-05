@@ -13,10 +13,17 @@ export interface Categories {
   category: string;
 }
 
-enum OrderStatus {
+export enum OrderStatus {
   Pending = 'pending',
   Completed = 'completed',
   Cancelled = 'cancelled',
+}
+
+export interface ItemDetail {
+  itemId: string; // ID of the item
+  quantity: number; // Quantity of the item
+  name: string;
+  price: number;
 }
 
 export interface Order {
@@ -24,16 +31,20 @@ export interface Order {
   customerId?: string;
   deviceId: string; // Identifier for the Android box in each room
   roomRate: number; // Hourly rate for the room
-  startTime: Date; // When the room was occupied
-  endTime?: Date; // When the room was vacated, optional until the session ends
+  startTime: number; // When the room was occupied (Unix epoch timestamp)
+  endTime?: number; // When the room was vacated, optional until the session ends (Unix epoch timestamp)
   durationHours?: number; // Calculated based on startTime and endTime
   status: OrderStatus;
-  itemsTotalPrice: number; // Total price for all the items ordered
+  itemsTotalPrice?: number; // Total price for all the items ordered
   roomTotalPrice?: number; // Calculated based on roomRate and durationHours
-  grandTotalPrice?: number;
-  items: Item[]; // Array of items in the order
+  grandTotalPrice?: number; // Total price including room and items
+  // New field for item summary
+  itemSummary?: {
+    totalItems: number; // Total number of items in the order
+    totalPrices: number; // Total price of all items
+    items: ItemDetail[];
+  };
 }
-
 export interface Room {
   id: string;
   price: number;
