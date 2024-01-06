@@ -1,5 +1,8 @@
 {
   "projects": {
-    "default": "karaoke-pos"
-  }
+    "default": "karaoke-pos",
+    "pos": "karaoke-pos"
+  },
+  "targets": {},
+  "etags": {}
 }

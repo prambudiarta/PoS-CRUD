@@ -113,8 +113,6 @@ const routes: RouteRecordRaw[] = [
         name: 'showUser',
         component: () => import('pages/User/ShowUsers.vue'),
       },
-      { path: 'create', component: () => import('pages/User/CreateUser.vue') },
-      { path: 'edit/:id', component: () => import('pages/User/EditUser.vue') },
     ],
     meta: { requiresAuth: true, role: 'Manager' },
   },

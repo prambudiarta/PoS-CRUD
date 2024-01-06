@@ -2,5 +2,11 @@
   "extends": "@quasar/app-vite/tsconfig-preset",
   "compilerOptions": {
     "baseUrl": "."
-  }
+  },
+  "include": [
+    "src/**/*.ts", // Include all TypeScript files in your src directory
+    "src/types/**/*.d.ts", // Include TypeScript declaration files in your types directory
+    "src/types/electron.d.ts", // Include your custom electron.d.ts file
+    "src/utils/printUtilsJS.js"
+  ]
 }

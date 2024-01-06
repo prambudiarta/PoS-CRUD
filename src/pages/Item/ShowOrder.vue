@@ -40,7 +40,7 @@
           </q-td>
           <q-td>
             <!-- <q-btn flat icon="edit" @click="editPrinter(props.row)" /> -->
-            <q-btn flat icon="print" @click="printStruck(props.row)" />
+            <q-btn flat icon="print" @click="openPrintOrder(props.row)" />
             <q-btn
               flat
               icon="task_alt"
@@ -146,6 +146,47 @@
     </q-card>
   </q-dialog>
 
+  <!-- Printer Dialog -->
+  <q-dialog v-model="openPrintDialog" persistent>
+    <q-card>
+      <q-card-section class="row items-center">
+        <q-space />
+        <q-btn icon="close" flat round @click="openPrintDialog = false" />
+      </q-card-section>
+
+      <q-card-section>
+        <div class="text-h6" style="margin-bottom: 20px">Select Printer</div>
+        <q-list>
+          <q-item
+            v-for="print in printer"
+            :key="print.id"
+            clickable
+            :class="{ 'selected-printer': selectedPrinter === print }"
+            @click="selectPrinter(print)"
+          >
+            <q-item-section>{{ print.description }}</q-item-section>
+          </q-item>
+        </q-list>
+      </q-card-section>
+
+      <q-card-actions align="right">
+        <q-btn
+          flat
+          label="Cancel"
+          color="negative"
+          @click="openPrintDialog = false"
+        />
+        <q-btn
+          flat
+          label="Print"
+          color="primary"
+          @click="printStruck"
+          :disabled="!selectedRoom"
+        />
+      </q-card-actions>
+    </q-card>
+  </q-dialog>
+
   <!-- Item Management Dialog -->
   <q-dialog v-model="manageItemsDialog">
     <q-card>
@@ -223,6 +264,19 @@ export default defineComponent({
     const currentOrder = ref({} as Order);
     const currentOrderItems = ref([] as ItemDetail[]);
     const selectedItem = ref<Item | null>(null);
+
+    const openPrintDialog = ref(false);
+    const printer = ref<Printer[]>([]);
+    const selectedPrinter = ref({} as Printer); // This will hold the selected room
+
+    const openPrintOrder = async (order: Order) => {
+      // Fetch rooms from Firebase
+      await deviceStore.fetchPrinter();
+      printer.value = deviceStore.printers;
+      currentOrder.value = order;
+      // Open the dialog
+      openPrintDialog.value = true;
+    };
 
     const openManageItemsDialog = async (order: Order) => {
       currentOrder.value = order;
@@ -346,8 +400,22 @@ export default defineComponent({
       console.log(orders.value);
     };
 
-    const printStruck = async (order: Order) => {
-      console.log(order);
+    const selectPrinter = (printer: Printer) => {
+      selectedPrinter.value = printer;
+      // You can do more things here, like setting up a new order object
+    };
+
+    const printStruck = async () => {
+      try {
+        const simpleOrder = JSON.parse(JSON.stringify(currentOrder.value));
+        console.log(simpleOrder);
+        window.electronAPI.sendPrintOrder(
+          selectedPrinter.value.id,
+          simpleOrder
+        );
+      } catch (e) {
+        console.log(e);
+      }
     };
 
     const closeOrder = async (order: Order) => {
@@ -400,6 +468,11 @@ export default defineComponent({
       addItemToOrder,
       closeManageItemsDialog,
       updateItemOrder,
+      printer,
+      selectedPrinter,
+      openPrintDialog,
+      openPrintOrder,
+      selectPrinter,
     };
   },
 });
@@ -407,6 +480,10 @@ export default defineComponent({
 
 <style>
 .selected-room {
+  background-color: #e0e0e0; /* Choose a highlight color that fits your design */
+}
+
+.selected-printer {
   background-color: #e0e0e0; /* Choose a highlight color that fits your design */
 }
 </style>

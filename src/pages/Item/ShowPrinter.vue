@@ -103,7 +103,12 @@ export default {
     };
 
     const testPrinter = async (printerId: string) => {
-      console.log(printerId);
+      try {
+        console.log('testprint');
+        window.electronAPI.sendPrintTest(printerId);
+      } catch (e) {
+        console.log(e);
+      }
     };
 
     const editCategory = (printer: Printer) => {
