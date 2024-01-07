@@ -9,7 +9,7 @@
 
       <q-card-section>
         <!-- Form for item data -->
-        <q-input v-model="localPrinter.id" label="Printer Id" />
+        <q-input v-model="localPrinter.id" label="Printer IP" />
         <q-input v-model="localPrinter.description" label="Deskripsi" />
         <!-- Add other fields as needed -->
       </q-card-section>

@@ -7,7 +7,7 @@
         @click="openNewCategoryForm"
         class="q-mr-md"
       />
-      <q-input v-model="searchQuery" placeholder="Search Room" />
+      <q-input v-model="searchQuery" placeholder="Search Printer" />
     </div>
     <q-table
       title="Printer List"
@@ -76,7 +76,7 @@ export default {
       {
         name: 'id',
         required: true,
-        label: 'Printer Id',
+        label: 'Printer IP',
         align: 'left',
         field: (row: Printer) => row.id,
         sortable: true,

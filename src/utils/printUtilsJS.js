@@ -2,40 +2,50 @@ const escpos = require('escpos');
 escpos.Network = require('escpos-network');
 const { formatTimestamp } = require('./firebaseDateFormatter');
 
-function testPrinter(deviceId) {
-  console.log('JS');
-  console.log(deviceId);
-  const device = new escpos.Network('deviceId');
-  const options = { encoding: 'GB18030' /* default */ };
-  const printer = new escpos.Printer(device, options);
+async function testPrinter(deviceId) {
+  const device = new escpos.Network(deviceId);
+  // const options = { encoding: 'GB18030' /* default */ };
+  const printer = new escpos.Printer(device);
 
   device.open((error) => {
+    console.log('Device Open');
     if (error) {
       console.error('Error in opening device:', error);
       return;
     }
 
     printer
-      .font('A')
+      // TODO: Update
+      .getStatus('PrinterStatus', (status) => {
+        console.log(status.toJSON());
+      })
+      .close();
+
+    printer
+      .getStatuses((statuses) => {
+        statuses.forEach((status) => {
+          console.log(status.toJSON());
+        });
+      })
+      .close();
+
+    console.log('End Of Test');
+
+    printer
+      .font('C')
       .align('CT')
-      .style('BU')
       .size(1, 1)
       .text('The quick brown fox jumps over the lazy dog')
-      .text('敏捷的棕色狐狸跳过懒狗')
-      .barcode('1234567', 'EAN8')
       .table(['One', 'Two', 'Three'])
-      .tableCustom({ text: 'Left', align: 'LEFT', width: 0.33 });
+      .tableCustom({ text: 'Left', align: 'LEFT', width: 0.33 })
+      .cut()
+      .close();
   });
 }
 
 function printOrder(deviceId, order) {
-  console.log('printOrder');
-  console.log(deviceId);
-  console.log(order);
-
   const device = new escpos.Network(deviceId);
-  const options = { encoding: 'GB18030' };
-  const printer = new escpos.Printer(device, options);
+  const printer = new escpos.Printer(device);
 
   device.open((error) => {
     if (error) {
@@ -45,9 +55,9 @@ function printOrder(deviceId, order) {
 
     // Start printing
     printer
-      .font('A')
+      .font('B')
       .align('CT')
-      .style('BU')
+      .style('NORMALs')
       .size(1, 1)
       .text('Order Receipt')
       .align('LT')
@@ -60,18 +70,23 @@ function printOrder(deviceId, order) {
         'End Time: ' + (order.endTime ? formatTimestamp(order.endTime) : 'N/A')
       )
       .text('Duration: ' + (order.durationHours || 'N/A') + ' hours')
-      .text('Items:');
+      .text('')
+      .text('Tambahan:');
 
     order.itemSummary?.items.forEach((item) => {
       printer.text(
-        item.name + ' x ' + item.quantity + ' @ ' + item.price + ' each'
+        item.name + ' x ' + item.quantity + ' @ Rp. ' + item.price + ''
       );
     });
 
     printer
+      .text('')
       .text('Items Total Price: ' + (order.itemsTotalPrice || 'N/A'))
       .text('Room Total Price: ' + (order.roomTotalPrice || 'N/A'))
       .text('Grand Total Price: ' + (order.grandTotalPrice || 'N/A'))
+      .align('CT')
+      .text('Thank You For Your Visit')
+      .text('')
       .cut()
       .close();
   });
