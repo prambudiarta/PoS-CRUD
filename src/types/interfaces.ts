@@ -31,3 +31,27 @@ export interface User {
   email: string;
   role: string;
 }
+
+// Define the basic structure for a sports package
+export interface IPackage {
+  packageName: string;
+  price: number;
+  sku: string;
+  duration: string;
+  details?: string;
+}
+
+// Define the structure for a sport, which includes a collection of packages
+export interface ISport {
+  sportName: string;
+  sportDescription: string;
+  packages?: IPackage[];
+}
+
+// Define the structure for a field, which includes a collection of sports
+export interface IField {
+  fieldId: string;
+  fieldName: string;
+  location: string;
+  sports?: ISport[];
+}
