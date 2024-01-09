@@ -81,6 +81,10 @@ const routes: RouteRecordRaw[] = [
     ],
   },
   {
+    path: '/menu/:deviceId',
+    component: () => import('pages/menu/MenuPage.vue'),
+  },
+  {
     path: '/lapangan',
     component: () => import('layouts/AdminLayout.vue'),
     children: [

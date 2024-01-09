@@ -2,7 +2,7 @@
 
 import { defineStore } from 'pinia';
 import { db } from 'src/firebaseConfig';
-import { collection, getDocs, setDoc } from 'firebase/firestore';
+import { collection, getDocs, query, setDoc, where } from 'firebase/firestore';
 import {
   Item,
   ItemDetail,
@@ -142,6 +142,30 @@ export const useOrderStore = defineStore('orderStore', {
       await updateDoc(orderRef, {
         itemSummary: itemSummary,
       });
+    },
+    async checkOrderForRoom(deviceId: string) {
+      const ordersQuery = query(
+        collection(db, 'order'),
+        where('deviceId', '==', deviceId),
+        where('status', '==', 'pending')
+      );
+
+      try {
+        const querySnapshot = await getDocs(ordersQuery);
+        const orders = querySnapshot.docs.map((doc) => doc.data());
+
+        // Check if there's any active order
+        if (orders.length > 0) {
+          // Assuming you want the latest order if there are multiple
+          const latestOrder = orders[0];
+          return latestOrder;
+        } else {
+          return null; // No active orders found
+        }
+      } catch (error) {
+        console.error('Error fetching orders:', error);
+        throw error; // Rethrow or handle error as needed
+      }
     },
   },
 });
