@@ -37,7 +37,7 @@ export interface IPackage {
   packageName: string;
   price: number;
   sku: string;
-  duration: string;
+  duration: number;
   details?: string;
 }
 
