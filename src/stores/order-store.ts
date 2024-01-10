@@ -152,7 +152,15 @@ export const useOrderStore = defineStore('orderStore', {
 
       try {
         const querySnapshot = await getDocs(ordersQuery);
-        const orders = querySnapshot.docs.map((doc) => doc.data());
+        const orders = querySnapshot.docs.map((doc) => {
+          const order: Order = doc.data() as Order;
+
+          if (order.itemSummary && !Array.isArray(order.itemSummary.items)) {
+            order.itemSummary.items = [order.itemSummary.items];
+          }
+
+          return order;
+        });
 
         // Check if there's any active order
         if (orders.length > 0) {

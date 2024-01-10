@@ -8,9 +8,28 @@
       </q-card-section>
 
       <q-card-section>
-        <!-- Form for item data -->
+        <!-- Form for category data -->
         <q-input v-model="localCategory.category" label="Category Name" />
-        <!-- Add other fields as needed -->
+        <!-- Image upload and preview -->
+        <div
+          v-if="localCategory.imageUrl"
+          class="q-mt-md"
+          @click="triggerFileInput"
+        >
+          <img
+            :src="localCategory.imageUrl"
+            alt="Image preview"
+            class="image-preview"
+          />
+        </div>
+        <input
+          type="file"
+          ref="fileInput"
+          accept="image/*"
+          @change="handleFileChange"
+          hidden
+        />
+        <q-btn flat @click="triggerFileInput" label="Upload Image" />
       </q-card-section>
 
       <q-card-actions align="right">
@@ -28,20 +47,16 @@ import { useItemStore } from 'src/stores/item-store';
 export default {
   props: {
     category: Object,
-    isOpen: Boolean, // Add this prop for external control
+    isOpen: Boolean,
   },
   setup(props, { emit }) {
-    const { isOpen } = toRefs(props); // Destructure isOpen from props
+    const { isOpen } = toRefs(props);
     const dialog = ref(isOpen.value);
     const localCategory = ref({ ...props.category });
     const isEditMode = computed(() => props.category && props.category.id);
-
+    const fileInput = ref(null);
     const itemStore = useItemStore();
 
-    console.log('props');
-    console.log(props);
-
-    // Watch for changes in isOpen prop
     watch(isOpen, (newValue) => {
       dialog.value = newValue;
     });
@@ -54,20 +69,34 @@ export default {
       { deep: true }
     );
 
+    const triggerFileInput = () => {
+      fileInput.value.click();
+    };
+
+    const handleFileChange = () => {
+      if (fileInput.value && fileInput.value.files.length > 0) {
+        const file = fileInput.value.files[0];
+        localCategory.value.imageUrl = URL.createObjectURL(file);
+      }
+    };
+
     const saveCategory = async () => {
       try {
         if (isEditMode.value) {
-          // Existing item: update it
-          await itemStore.updateCategory(localCategory.value);
+          await itemStore.updateCategory(
+            localCategory.value,
+            fileInput.value.files[0]
+          );
         } else {
-          // New item: add it
-          await itemStore.saveCategory(localCategory.value);
+          await itemStore.saveCategory(
+            localCategory.value,
+            fileInput.value.files[0]
+          );
         }
         dialog.value = false;
         emit('save');
       } catch (error) {
         console.error('Error saving category:', error);
-        // Handle the error, e.g., show a notification to the user
       }
     };
 
@@ -75,8 +104,18 @@ export default {
       dialog,
       localCategory,
       isEditMode,
+      fileInput,
+      triggerFileInput,
+      handleFileChange,
       saveCategory,
     };
   },
 };
 </script>
+
+<style>
+.image-preview {
+  max-width: 100%;
+  max-height: 200px; /* Adjust as needed */
+}
+</style>

@@ -83,14 +83,21 @@ export const useItemStore = defineStore('itemStore', {
         // Ensure that the data conforms to the Item type
         const categories: Categories = {
           id: doc.id,
+          imageUrl: data.imageUrl,
           category: data.category,
         };
         return categories;
       });
     },
-    async saveCategory(category: Omit<Categories, 'id'>) {
+    async saveCategory(category: Omit<Categories, 'id'>, file: File | null) {
+      let imageUrl = '';
+      if (file) {
+        imageUrl = await uploadImage(file);
+      }
+
       const docRef = await addDoc(collection(db, 'categories'), {
         ...category,
+        imageUrl: imageUrl,
       });
 
       this.categories.push({ id: docRef.id, ...category });
@@ -102,15 +109,21 @@ export const useItemStore = defineStore('itemStore', {
         (category) => category.id !== categoryId
       );
     },
-    async updateCategory(updatedCategory: Categories) {
+    async updateCategory(updatedCategory: Categories, file: File | null) {
       if (!updatedCategory.id) {
         throw new Error('Category must have an ID for updating');
+      }
+
+      let imageUrl = '';
+      if (file) {
+        imageUrl = await uploadImage(file);
       }
 
       const categoryRef = doc(db, 'categories', updatedCategory.id);
 
       const updateObject = {
         category: updatedCategory.category,
+        imageUrl: imageUrl === '' ? updatedCategory.imageUrl : imageUrl,
       };
 
       await updateDoc(categoryRef, updateObject);

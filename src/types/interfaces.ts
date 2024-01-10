@@ -10,6 +10,7 @@ export interface Item {
 
 export interface Categories {
   id?: string;
+  imageUrl?: string;
   category: string;
 }
 
@@ -38,6 +39,7 @@ export interface Order {
   itemsTotalPrice?: number; // Total price for all the items ordered
   roomTotalPrice?: number; // Calculated based on roomRate and durationHours
   grandTotalPrice?: number; // Total price including room and items
+  requestClose?: boolean;
   // New field for item summary
   itemSummary?: {
     totalItems: number; // Total number of items in the order

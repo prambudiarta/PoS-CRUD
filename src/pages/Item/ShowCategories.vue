@@ -15,6 +15,13 @@
       :columns="columns"
       row-key="id"
     >
+      <!-- Custom slot for image -->
+      <template v-slot:body-cell-image="props">
+        <q-td :props="props">
+          <img :src="props.row.imageUrl" alt="Item Image" height="50" />
+        </q-td>
+      </template>
+
       <!-- Custom slot for edit button -->
       <template v-slot:body-cell-edit="props">
         <q-td :props="props">
@@ -83,6 +90,13 @@ export default {
         sortable: true,
       },
       {
+        name: 'image',
+        label: 'Image',
+        field: 'imageUrl',
+        align: 'center',
+        sortable: false,
+      },
+      {
         name: 'edit',
         label: 'Action',
         field: 'editAction',
@@ -95,6 +109,7 @@ export default {
     const fetchCategories = async () => {
       await itemStore.fetchCategories();
       categories.value = itemStore.categories;
+      console.log(categories.value);
     };
 
     const editCategory = (category: Categories) => {
@@ -104,7 +119,7 @@ export default {
 
     const updateCategory = async (category: Categories) => {
       // Call the store method to update the item
-      await itemStore.updateCategory(category);
+      // await itemStore.updateCategory(category);
       // Refresh items list or handle UI update here
     };
 
