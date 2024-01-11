@@ -1,3 +1,4 @@
+//DEPRECATED
 export interface Item {
   id?: string; // Optional, used if items are identifiable (e.g., by a Firestore document ID)
   name: string; // Name of the item
@@ -6,6 +7,7 @@ export interface Item {
   imageUrl?: string; // URL of the item's image, optional
 }
 
+//DEPRECATED
 export interface Lapangan {
   id?: string;
   nama: string;
@@ -13,6 +15,7 @@ export interface Lapangan {
   olahraga: Record<string, number>;
 }
 
+//DEPRECATED
 export interface Booking {
   id?: string;
   status?: string;
