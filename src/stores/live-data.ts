@@ -12,7 +12,7 @@ import {
 import { defineStore } from 'pinia';
 import { db } from 'src/firebaseConfig';
 import { minionUiSendMail } from 'src/minion/minion_send_email';
-import { Booking, Lapangan } from 'src/types/interfaces';
+import { Booking, IField, Lapangan } from 'src/types/interfaces';
 import {
   generateUniqueCode,
   isCodeUnique,
@@ -23,9 +23,61 @@ export const useLiveData = defineStore('liveData', {
   state: () => ({
     lapangan: [] as Lapangan[],
     bookings: [] as Booking[],
+    fields: [] as IField[],
   }),
   getters: {},
   actions: {
+    async loadFields() {
+      const fieldsCollection = collection(db, 'lapangan');
+      const fieldsSnapshot = await getDocs(query(fieldsCollection));
+
+      const fieldsPromises = fieldsSnapshot.docs.map(async (doc) => {
+        const fieldData = doc.data();
+
+        // Fetch sports for this field
+        const sportsCollection = collection(db, `lapangan/${doc.id}/Sports`);
+        const sportsSnapshot = await getDocs(query(sportsCollection));
+
+        const sportsPromises = sportsSnapshot.docs.map(async (sportDoc) => {
+          const sportData = sportDoc.data();
+
+          // Fetch packages for this sport
+          const packagesCollection = collection(
+            db,
+            `lapangan/${doc.id}/Sports/${sportDoc.id}/Packages`
+          );
+          const packagesSnapshot = await getDocs(query(packagesCollection));
+
+          const packages = packagesSnapshot.docs.map((packageDoc) => {
+            const packageData = packageDoc.data();
+            return {
+              packageName: packageData.packageName,
+              price: packageData.price,
+              sku: packageData.sku,
+              duration: packageData.duration,
+              details: packageData.details,
+            };
+          });
+
+          return {
+            sportId: sportDoc.id,
+            sportName: sportData.sportName,
+            sportDescription: sportData.sportDescription,
+            packages: await Promise.all(packages),
+          };
+        });
+
+        return {
+          fieldId: doc.id,
+          fieldName: fieldData.fieldName,
+          location: fieldData.location,
+          facilities: fieldData.facilities, // Assuming facilities is an array in fieldData
+          sports: await Promise.all(sportsPromises),
+        };
+      });
+
+      this.fields = await Promise.all(fieldsPromises);
+    },
     async fetchLapangan() {
       const lapanganSnapshot = await getDocs(collection(db, 'lapangan'));
 
