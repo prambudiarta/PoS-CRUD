@@ -47,7 +47,7 @@
             color="green"
             icon="task_alt"
             label="Close Order"
-            @click="showCheckoutDialog = true"
+            @click="showCloseOrderDialog = true"
           />
         </div>
       </q-list>
@@ -87,6 +87,25 @@
         </q-card-section>
         <q-card-actions align="right">
           <q-btn flat label="Close" @click="showCurrentOrderDialog = false" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
+    <!-- Close Order Dialog -->
+    <q-dialog v-model="showCloseOrderDialog">
+      <q-card>
+        <q-card-section>
+          <div class="text-h6">Confirm Close Order</div>
+        </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn
+            flat
+            label="Cancel"
+            color="negative"
+            @click="showCloseOrderDialog = false"
+          />
+          <q-btn flat label="Confirm" color="positive" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -193,6 +212,7 @@ export default defineComponent({
     const tempOrder = ref<Item[]>([]);
     const showCheckoutDialog = ref(false);
     const showCurrentOrderDialog = ref(false);
+    const showCloseOrderDialog = ref(false);
 
     const orderStore = useOrderStore();
     const itemStore = useItemStore();
@@ -310,6 +330,7 @@ export default defineComponent({
       confirmCheckout,
       showCurrentOrderDialog,
       openCurrentOrderDialog,
+      showCloseOrderDialog,
     };
   },
 

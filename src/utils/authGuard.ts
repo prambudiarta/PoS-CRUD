@@ -42,7 +42,7 @@ export const authGuard = (to: any, from: any, next: any) => {
             } else {
               resolve(next());
             }
-          } else if (to.path === '/login') {
+          } else if (to.path === '/login' || to.path === '/menu/:deviceId') {
             resolve(next());
           } else {
             resolve(next('/login'));
