@@ -36,8 +36,16 @@
               class="full-width"
               size="lg"
             />
+
+            <!-- untuk buka window -->
+            <q-btn label="Choose Date" color="primary" @click="toggleTanggal" />
           </q-card-section>
         </q-card>
+
+        <!-- Dialog that contains the PilihTanggal component -->
+        <q-dialog v-model="dialogTanggal">
+          <PilihTanggal />
+        </q-dialog>
       </q-page>
     </q-page-container>
   </q-layout>
@@ -52,8 +60,12 @@ import { db } from 'src/firebaseConfig';
 import { doc, getDoc } from 'firebase/firestore';
 import { useUserStore } from 'src/stores/user-store';
 
+import PilihTanggal from 'src/components/PilihTanggalComponent.vue';
+
 export default {
+  components: { PilihTanggal },
   setup() {
+    const dialogTanggal = ref(false); // Reactive property to control dialog visibility
     const router = useRouter();
     const user = ref({
       email: '',
@@ -127,9 +139,15 @@ export default {
       }
     };
 
+    const toggleTanggal = () => {
+      dialogTanggal.value = !dialogTanggal.value;
+    };
+
     return {
       user,
       login,
+      dialogTanggal,
+      toggleTanggal,
     };
   },
 };
