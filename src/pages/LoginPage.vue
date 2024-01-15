@@ -51,18 +51,17 @@
   </q-layout>
 </template>
 
-<script>
-import { ref } from 'vue';
+<script lang="ts">
+import { defineComponent, ref } from 'vue';
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 import { useRouter } from 'vue-router';
 import Swal from 'sweetalert2';
 import { db } from 'src/firebaseConfig';
 import { doc, getDoc } from 'firebase/firestore';
 import { useUserStore } from 'src/stores/user-store';
-
 import PilihTanggal from 'src/components/PilihTanggalComponent.vue';
 
-export default {
+export default defineComponent({
   components: { PilihTanggal },
   setup() {
     const dialogTanggal = ref(false); // Reactive property to control dialog visibility
@@ -150,7 +149,7 @@ export default {
       toggleTanggal,
     };
   },
-};
+});
 </script>
 
 <style>
