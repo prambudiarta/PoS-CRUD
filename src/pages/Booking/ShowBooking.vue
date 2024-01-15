@@ -61,12 +61,12 @@ export default defineComponent({
       const allSports = fields.value.flatMap((field) => field.sports);
       const uniqueSports = [
         ...new Map(
-          allSports.map((sport) => [sport['sportName'], sport])
+          allSports.map((sport) => [sport!['sportName'], sport])
         ).values(),
       ];
       return uniqueSports.map((sport) => ({
-        label: sport.sportName,
-        value: sport.sportName,
+        label: sport!.sportName,
+        value: sport!.sportName,
       }));
     });
 
@@ -74,8 +74,8 @@ export default defineComponent({
       if (!selectedSport.value) return [];
       return fields.value
         .filter((field) =>
-          field.sports.some(
-            (sport) => sport.sportName === selectedSport.value.value
+          field.sports!.some(
+            (sport) => sport.sportName === selectedSport.value!.value
           )
         )
         .map((field) => ({ label: field.fieldName, value: field.fieldId }));
@@ -90,7 +90,7 @@ export default defineComponent({
         (sport) => sport.sportName === selectedSport.value.value
       );
       return (
-        selectedSportData?.packages.map((pck) => ({
+        selectedSportData?.packages?.map((pck) => ({
           label: pck.packageName,
           value: pck,
         })) || []

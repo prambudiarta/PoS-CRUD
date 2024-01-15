@@ -222,8 +222,6 @@ import { defineComponent, onMounted, ref } from 'vue';
 import {
   getFirestore,
   collection,
-  getDocs,
-  query,
   setDoc,
   doc,
   deleteDoc,

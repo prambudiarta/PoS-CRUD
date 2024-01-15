@@ -43,8 +43,8 @@
   </q-layout>
 </template>
 
-<script>
-import { ref } from 'vue';
+<script lang="ts">
+import { defineComponent, ref } from 'vue';
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 import { useRouter } from 'vue-router';
 import Swal from 'sweetalert2';
@@ -52,7 +52,7 @@ import { db } from 'src/firebaseConfig';
 import { doc, getDoc } from 'firebase/firestore';
 import { useUserStore } from 'src/stores/user-store';
 
-export default {
+export default defineComponent({
   setup() {
     const router = useRouter();
     const user = ref({
@@ -132,7 +132,7 @@ export default {
       login,
     };
   },
-};
+});
 </script>
 
 <style>
