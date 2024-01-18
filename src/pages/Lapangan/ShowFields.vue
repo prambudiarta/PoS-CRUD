@@ -10,7 +10,7 @@
       </div>
 
       <!-- New Field Dialog -->
-      <q-dialog v-model="showDialog">
+      <q-dialog v-model="showDialog" persistent>
         <q-card>
           <q-card-section>
             <div class="text-h6">Add New Field</div>
@@ -33,7 +33,10 @@
               flat
               label="Cancel"
               color="primary"
-              @click="showDialog = false"
+              @click="
+                showDialog = false;
+                isEditMode = false;
+              "
             />
             <q-btn flat label="Save" color="primary" @click="saveNewField" />
           </q-card-actions>
@@ -41,7 +44,7 @@
       </q-dialog>
 
       <!-- Create/Edit Sport Dialog -->
-      <q-dialog v-model="editSportDialog">
+      <q-dialog v-model="editSportDialog" persistent>
         <q-card>
           <q-card-section>
             <div class="text-h6">
@@ -69,7 +72,10 @@
               flat
               label="Cancel"
               color="primary"
-              @click="editSportDialog = false"
+              @click="
+                editSportDialog = false;
+                isEditMode = false;
+              "
             />
             <q-btn flat label="Save" color="primary" @click="saveSport" />
           </q-card-actions>
@@ -77,7 +83,7 @@
       </q-dialog>
 
       <!-- Create/Edit Package Dialog -->
-      <q-dialog v-model="editPackageDialog">
+      <q-dialog v-model="editPackageDialog" persistent>
         <q-card>
           <q-card-section>
             <div class="text-h6">
@@ -113,7 +119,10 @@
               flat
               label="Cancel"
               color="primary"
-              @click="editPackageDialog = false"
+              @click="
+                editPackageDialog = false;
+                isEditMode = false;
+              "
             />
             <q-btn flat label="Save" color="primary" @click="savePackage" />
           </q-card-actions>
@@ -177,8 +186,8 @@
                   <div class="text-subtitle1">{{ pck.packageName }}</div>
                   <div>{{ pck.details }}</div>
                   <div>{{ pck.sku }}</div>
-                  <div>{{ pck.price }}</div>
-                  <div>{{ pck.duration }}</div>
+                  <div>Rp. {{ pck.price }}</div>
+                  <div>{{ pck.duration }} Jam</div>
                 </div>
                 <div>
                   <q-btn

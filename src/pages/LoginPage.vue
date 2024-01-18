@@ -36,9 +36,6 @@
               class="full-width"
               size="lg"
             />
-
-            <!-- untuk buka window -->
-            <q-btn label="Choose Date" color="primary" @click="toggleTanggal" />
           </q-card-section>
         </q-card>
 
@@ -59,10 +56,8 @@ import Swal from 'sweetalert2';
 import { db } from 'src/firebaseConfig';
 import { doc, getDoc } from 'firebase/firestore';
 import { useUserStore } from 'src/stores/user-store';
-import PilihTanggal from 'src/components/PilihTanggalComponent.vue';
 
 export default defineComponent({
-  components: { PilihTanggal },
   setup() {
     const dialogTanggal = ref(false); // Reactive property to control dialog visibility
     const router = useRouter();
