@@ -1,36 +1,47 @@
 <template>
   <q-page padding>
     <div class="q-pa-md">
-      <q-select
-        filled
-        v-model="selectedSport"
-        :options="sportsOptions"
-        label="Select Sport"
-        @click="onSportSelect"
-      />
-      <q-select
-        filled
-        v-model="selectedField"
-        :options="fieldOptions"
-        label="Select Field"
-        class="q-mt-md"
-        @click="onFieldSelect"
-        :disable="!selectedSport"
-      />
-      <q-select
-        filled
-        v-model="selectedPackage"
-        :options="packageOptions"
-        :disable="!selectedSport"
-        label="Select Package"
-        class="q-mt-md"
-      />
-      <q-btn
-        :disable="!selectedPackage"
-        label="Pilih Waktu"
-        color="primary"
-        class="q-mt-md"
-      />
+      <div class="row">
+        <q-select
+          filled
+          v-model="selectedSport"
+          :options="sportsOptions"
+          label="Select Sport"
+          @click="onSportSelect"
+          class="full-width"
+        />
+      </div>
+      <div class="row q-mt-md">
+        <q-select
+          filled
+          v-model="selectedField"
+          :options="fieldOptions"
+          label="Select Field"
+          @click="onFieldSelect"
+          :disable="!selectedSport"
+          class="full-width"
+        />
+      </div>
+      <div class="row q-mt-md">
+        <q-select
+          filled
+          v-model="selectedPackage"
+          :options="packageOptions"
+          :disable="!selectedSport"
+          label="Select Package"
+          class="full-width"
+        />
+      </div>
+      <div class="row q-mt-md">
+        <q-btn
+          :disable="!selectedPackage"
+          label="Pilih Waktu"
+          color="primary"
+        />
+      </div>
+      <div class="row q-mt-md">
+        <calendar-component class="full-width" />
+      </div>
     </div>
   </q-page>
 </template>
@@ -39,8 +50,10 @@
 import { defineComponent, ref, computed, onMounted } from 'vue';
 import { IField } from 'src/types/interfaces';
 import { useLiveData } from 'src/stores/live-data';
+import CalendarComponent from 'src/components/CalendarComponent.vue';
 
 export default defineComponent({
+  components: { CalendarComponent },
   name: 'SelectPackagePage',
   setup() {
     const fields = ref([] as IField[]); // Load this from Firestore or other source
