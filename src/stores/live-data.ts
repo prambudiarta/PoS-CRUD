@@ -1,3 +1,4 @@
+import { E } from 'app/dist/pwa/assets/index.3d616b04';
 import {
   addDoc,
   collection,
@@ -118,7 +119,7 @@ export const useLiveData = defineStore('liveData', {
           code: uniqueCode,
         } as IBooking;
 
-        const docName = `${booking.startTime}_${booking.endTime}_${booking.field.fieldName}_${uniqueCode}`;
+        const docName = `${booking.startTime}_${booking.endTime}_${booking.field.fieldId}_${uniqueCode}`;
 
         await setDoc(doc(db, 'newBooking', docName), bookingWithCode);
 
@@ -126,6 +127,24 @@ export const useLiveData = defineStore('liveData', {
       } catch (error) {
         console.error(error);
         return 'An error occurred while saving the booking.';
+      }
+    },
+    async deleteNewBooking(id: string) {
+      try {
+        await deleteDoc(doc(db, 'newBooking', id));
+        return true;
+      } catch (e) {
+        return false;
+      }
+    },
+    async updateNewBooking(booking: IBooking, id: string) {
+      const saveNewBooking = await this.saveNewBooking(booking);
+
+      if (saveNewBooking == 'OK') {
+        await this.deleteNewBooking(id);
+        return saveNewBooking;
+      } else {
+        return saveNewBooking;
       }
     },
     async fetchLapangan() {

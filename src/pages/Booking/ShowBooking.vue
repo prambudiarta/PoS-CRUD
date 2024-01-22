@@ -92,12 +92,13 @@ export default defineComponent({
     });
 
     const toggleTanggal = () => {
-      dialogTanggal.value = !dialogTanggal.value;
       allData.value = {
+        isEdit: false,
         package: selectedPackage.value,
         sport: selectedSport.value,
         field: selectedField.value,
       };
+      dialogTanggal.value = !dialogTanggal.value;
     };
 
     const fieldOptions = computed(() => {

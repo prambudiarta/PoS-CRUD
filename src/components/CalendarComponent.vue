@@ -3,7 +3,7 @@
     <navigation-bar @today="onToday" @prev="onPrev" @next="onNext" />
 
     <div class="row justify-center">
-      <div style="display: flex; max-width: 800px; width: 100%; height: 400px">
+      <div style="display: flex; max-width: 800px; width: 100%; height: 900px">
         <q-calendar-agenda
           ref="calendarRef"
           v-model="selectedDate"
@@ -26,6 +26,7 @@
                 :label="a.time"
                 class="justify-start q-ma-sm shadow-5 bg-grey-6"
                 style="margin-top: 25px"
+                @click="toggleTanggal(a)"
               >
                 <div
                   v-if="a.avatar"
@@ -56,6 +57,10 @@
             </template>
           </template>
         </q-calendar-agenda>
+
+        <q-dialog v-model="dialogTanggal">
+          <PilihTanggal ref="pilihTanggalData" :pilih-tanggal-data="allData" />
+        </q-dialog>
       </div>
     </div>
   </div>
@@ -73,12 +78,13 @@ import {
 import '@quasar/quasar-ui-qcalendar/src/QCalendarVariables.sass';
 import '@quasar/quasar-ui-qcalendar/src/QCalendarTransitions.sass';
 import '@quasar/quasar-ui-qcalendar/src/QCalendarAgenda.sass';
-import calculateEndTime from 'src/utils/calculateEndTime';
+import PilihTanggal from 'src/components/PilihTanggalComponent.vue';
 
 export default defineComponent({
   name: 'AgendaColumnOptions',
   components: {
     NavigationBar,
+    PilihTanggal,
     QCalendarAgenda,
   },
   setup() {
@@ -86,6 +92,8 @@ export default defineComponent({
     const selectedDate = ref(today());
     const dataBooking = computed(() => liveData.newBooking);
     const calendarRef: Ref<any> = ref(null);
+    const dialogTanggal = ref(false);
+    const allData = ref({});
 
     const agenda = computed(() => parseData(dataBooking.value));
     // Fetch new bookings when component is mounted
@@ -110,9 +118,10 @@ export default defineComponent({
           }
 
           parsedData[dateString].push({
+            data: data,
             time: data.startTime.split(' ')[1],
             avatar: 'https://cdn.quasar.dev/img/boy-avatar.png',
-            desc: `${data.sport.sportName} ${data.package.details}`,
+            desc: `${data.field.fieldName} ${data.sport.sportName} ${data.package.details}`,
           });
         });
 
@@ -129,6 +138,19 @@ export default defineComponent({
         return agenda.value[dateKey] || [];
       };
     });
+
+    const toggleTanggal = (data: any) => {
+      allData.value = {
+        isEdit: true,
+        id: data.data.id,
+        startTime: data.data.startTime,
+        package: { label: 'Package', value: data.data.package },
+        sport: { label: 'Sport', value: data.data.sport },
+        field: { label: 'Field', value: data.data.field },
+      };
+      dialogTanggal.value = !dialogTanggal.value;
+      console.log(allData.value);
+    };
 
     const onToday = () => {
       if (calendarRef.value) {
@@ -152,6 +174,9 @@ export default defineComponent({
       calendarRef,
       selectedDate,
       getAgenda,
+      dialogTanggal,
+      allData,
+      toggleTanggal,
       onToday,
       onPrev,
       onNext,
@@ -160,78 +185,3 @@ export default defineComponent({
   },
 });
 </script>
-
-<!-- <script>
-import {
-  QCalendarAgenda,
-  today,
-} from '@quasar/quasar-ui-qcalendar/src/index.js';
-import '@quasar/quasar-ui-qcalendar/src/QCalendarVariables.sass';
-import '@quasar/quasar-ui-qcalendar/src/QCalendarTransitions.sass';
-import '@quasar/quasar-ui-qcalendar/src/QCalendarAgenda.sass';
-
-import { defineComponent, computed } from 'vue';
-import NavigationBar from '../components/NavigationBar.vue';
-import { useLiveData } from 'src/stores/live-data';
-
-export default defineComponent({
-  name: 'AgendaColumnOptions',
-  components: {
-    NavigationBar,
-    QCalendarAgenda,
-  },
-  data() {
-    const liveData = useLiveData();
-    const dataBooking = liveData.newBooking;
-
-    return {
-      selectedDate: today(),
-      agenda: parseData(dataBooking),
-    };
-  },
-  async mounted() {
-    const liveData = useLiveData();
-    await liveData.fetchNewBookings();
-  },
-  computed: {
-    getAgenda() {
-      return (day) => {
-        return this.agenda[parseInt(day.weekday, 10)];
-      };
-    },
-  },
-  methods: {
-    onToday() {
-      this.$refs.calendar.moveToToday();
-    },
-    onPrev() {
-      this.$refs.calendar.prev();
-    },
-    onNext() {
-      this.$refs.calendar.next();
-    },
-    onMoved(data) {
-      console.log('onMoved', data);
-    },
-    onChange(data) {
-      console.log('onChange', data);
-    },
-    onClickDate(data) {
-      console.log('onClickDate', data);
-    },
-    onClickTime(data) {
-      console.log('onClickTime', data);
-    },
-    onClickInterval(data) {
-      console.log('onClickInterval', data);
-    },
-    onClickHeadIntervals(data) {
-      console.log('onClickHeadIntervals', data);
-    },
-    onClickHeadDay(data) {
-      console.log('onClickHeadDay', data);
-    },
-  },
-});
-
-</script> -->
