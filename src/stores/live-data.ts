@@ -5,6 +5,7 @@ import {
   doc,
   getDocs,
   query,
+  setDoc,
   Timestamp,
   updateDoc,
   where,
@@ -12,11 +13,12 @@ import {
 import { defineStore } from 'pinia';
 import { db } from 'src/firebaseConfig';
 import { minionUiSendMail } from 'src/minion/minion_send_email';
-import { Booking, IField, Lapangan } from 'src/types/interfaces';
+import { Booking, IBooking, IField, Lapangan } from 'src/types/interfaces';
 import {
   generateUniqueCode,
   isCodeUnique,
 } from 'src/utils/bookingCodeGenerator';
+import calculateEndTime from 'src/utils/calculateEndTime';
 import formatDateFirestore from 'src/utils/firebaseDateFormatter';
 
 export const useLiveData = defineStore('liveData', {
@@ -24,6 +26,7 @@ export const useLiveData = defineStore('liveData', {
     lapangan: [] as Lapangan[],
     bookings: [] as Booking[],
     fields: [] as IField[],
+    newBooking: [] as IBooking[],
   }),
   getters: {},
   actions: {
@@ -71,12 +74,59 @@ export const useLiveData = defineStore('liveData', {
           fieldId: doc.id,
           fieldName: fieldData.fieldName,
           location: fieldData.location,
-          facilities: fieldData.facilities, // Assuming facilities is an array in fieldData
           sports: await Promise.all(sportsPromises),
         };
       });
 
       this.fields = await Promise.all(fieldsPromises);
+    },
+    async saveNewBooking(booking: IBooking) {
+      console.log('startSaving');
+
+      try {
+        booking.endTime = calculateEndTime(
+          booking.startTime,
+          booking.package.duration
+        );
+
+        console.log(booking);
+
+        const startTime = new Date(booking.startTime);
+        const endTime = new Date(booking.endTime);
+        const now = new Date();
+
+        // Check 1: start datetime can't be in the past
+        if (startTime < now) {
+          return 'Start datetime cannot be in the past.';
+        }
+
+        // Check 2: end datetime must be greater than start datetime
+        if (endTime <= startTime) {
+          return 'End datetime must be greater than start datetime.';
+        }
+
+        let uniqueCode = '';
+        let isUnique = false;
+
+        while (!isUnique) {
+          uniqueCode = generateUniqueCode();
+          isUnique = await isCodeUnique(uniqueCode);
+        }
+
+        const bookingWithCode = {
+          ...booking,
+          code: uniqueCode,
+        } as IBooking;
+
+        const docName = `${booking.startTime}_${booking.endTime}_${booking.field.fieldName}_${uniqueCode}`;
+
+        await setDoc(doc(db, 'newBooking', docName), bookingWithCode);
+
+        return 'OK';
+      } catch (error) {
+        console.error(error);
+        return 'An error occurred while saving the booking.';
+      }
     },
     async fetchLapangan() {
       const lapanganSnapshot = await getDocs(collection(db, 'lapangan'));
@@ -134,6 +184,25 @@ export const useLiveData = defineStore('liveData', {
           (lapangan) => lapangan.id !== lapanganId
         );
       }
+    },
+    async fetchNewBookings() {
+      const bookingsSnapshot = await getDocs(collection(db, 'newBooking'));
+      this.newBooking = bookingsSnapshot.docs.map((doc) => {
+        const data = doc.data();
+
+        const booking: IBooking = {
+          id: doc.id,
+          sport: data.sport,
+          code: data.code,
+          endTime: data.endTime, // Convert Firestore Timestamp to JavaScript Date
+          field: data.field,
+          package: data.package,
+          user: data.user,
+          startTime: data.startTime, // Convert Firestore Timestamp to JavaScript Date
+          playTime: data.playTime,
+        };
+        return booking;
+      }); // Sort bookings by startTime, newest first
     },
     async fetchBookings() {
       const bookingsSnapshot = await getDocs(collection(db, 'bookings'));

@@ -5,23 +5,17 @@
     <div class="row justify-center">
       <div style="display: flex; max-width: 800px; width: 100%; height: 400px">
         <q-calendar-agenda
-          ref="calendar"
+          ref="calendarRef"
           v-model="selectedDate"
           view="week"
-          :left-column-options="leftColumnOptions"
-          :right-column-options="rightColumnOptions"
-          :weekdays="[1, 2, 3, 4, 5]"
+          :weekdays="[0, 1, 2, 3, 4, 5, 6, 7]"
           :day-min-height="200"
+          :start-time="0"
+          :end-time="24"
+          :interval="60"
           bordered
           animated
-          locale="en-US"
-          @change="onChange"
-          @moved="onMoved"
-          @click-date="onClickDate"
-          @click-time="onClickTime"
-          @click-interval="onClickInterval"
-          @click-head-intervals="onClickHeadIntervals"
-          @click-head-day="onClickHeadDay"
+          locale="id-ID"
         >
           <template #day="{ scope: { timestamp } }">
             <template
@@ -67,7 +61,107 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent, ref, computed, onMounted, watch, Ref } from 'vue';
+import NavigationBar from '../components/NavigationBar.vue';
+import { useLiveData } from 'src/stores/live-data'; // Adjust the path
+import { IBooking } from 'src/types/interfaces';
+import {
+  QCalendarAgenda,
+  today,
+} from '@quasar/quasar-ui-qcalendar/src/index.js';
+import '@quasar/quasar-ui-qcalendar/src/QCalendarVariables.sass';
+import '@quasar/quasar-ui-qcalendar/src/QCalendarTransitions.sass';
+import '@quasar/quasar-ui-qcalendar/src/QCalendarAgenda.sass';
+import calculateEndTime from 'src/utils/calculateEndTime';
+
+export default defineComponent({
+  name: 'AgendaColumnOptions',
+  components: {
+    NavigationBar,
+    QCalendarAgenda,
+  },
+  setup() {
+    const liveData = useLiveData();
+    const selectedDate = ref(today());
+    const dataBooking = computed(() => liveData.newBooking);
+    const calendarRef: Ref<any> = ref(null);
+
+    const agenda = computed(() => parseData(dataBooking.value));
+    // Fetch new bookings when component is mounted
+    onMounted(async () => {
+      await liveData.fetchNewBookings();
+    });
+
+    function parseData(dataArray: IBooking[]) {
+      try {
+        const parsedData = {};
+
+        dataArray.forEach((data) => {
+          // Convert startTime to a Date object
+          const date = new Date(data.startTime);
+          const dayOfWeek = date.getDay();
+
+          // Format the date as a string 'YYYY-MM-DD'
+          const dateString = date.toISOString().split('T')[0];
+
+          if (!parsedData[dateString]) {
+            parsedData[dateString] = [];
+          }
+
+          parsedData[dateString].push({
+            time: data.startTime.split(' ')[1],
+            avatar: 'https://cdn.quasar.dev/img/boy-avatar.png',
+            desc: `${data.sport.sportName} ${data.package.details}`,
+          });
+        });
+
+        return parsedData;
+      } catch (e) {
+        return {};
+      }
+    }
+
+    const getAgenda = computed(() => {
+      return (timestamp) => {
+        // Format the timestamp date as 'YYYY-MM-DD'
+        const dateKey = new Date(timestamp.date).toISOString().split('T')[0];
+        return agenda.value[dateKey] || [];
+      };
+    });
+
+    const onToday = () => {
+      if (calendarRef.value) {
+        calendarRef.value.moveToToday();
+      }
+    };
+
+    const onPrev = () => {
+      if (calendarRef.value) {
+        calendarRef.value.prev();
+      }
+    };
+
+    const onNext = () => {
+      if (calendarRef.value) {
+        calendarRef.value.next();
+      }
+    };
+
+    return {
+      calendarRef,
+      selectedDate,
+      getAgenda,
+      onToday,
+      onPrev,
+      onNext,
+      //... other methods
+    };
+  },
+});
+</script>
+
+<!-- <script>
 import {
   QCalendarAgenda,
   today,
@@ -76,8 +170,9 @@ import '@quasar/quasar-ui-qcalendar/src/QCalendarVariables.sass';
 import '@quasar/quasar-ui-qcalendar/src/QCalendarTransitions.sass';
 import '@quasar/quasar-ui-qcalendar/src/QCalendarAgenda.sass';
 
-import { defineComponent } from 'vue';
+import { defineComponent, computed } from 'vue';
 import NavigationBar from '../components/NavigationBar.vue';
+import { useLiveData } from 'src/stores/live-data';
 
 export default defineComponent({
   name: 'AgendaColumnOptions',
@@ -86,110 +181,17 @@ export default defineComponent({
     QCalendarAgenda,
   },
   data() {
-    const dummmy = [
-      {
-        startTime: '2024-01-19 13:00',
-        endTime: '2024-01-19 14:00',
-        sport: {
-          sportId: 'Futsal',
-          sportName: 'Futsal',
-          sportDescription: 'Olahraga Futsal',
-          packages: [
-            {
-              packageName: 'Single Visit',
-              price: '50000',
-              sku: 'SV-FS-001',
-              duration: '1',
-              details: 'Paket 1 Jam',
-            },
-            {
-              packageName: 'VIP 6 Bulan',
-              price: '100000',
-              sku: 'VIP-FS-001',
-              duration: '1',
-              details: 'Paket VIP',
-            },
-          ],
-        },
-        package: {
-          packageName: 'Single Visit',
-          price: '50000',
-          sku: 'SV-FS-001',
-          duration: '1',
-          details: 'Paket 1 Jam',
-        },
-        field: {
-          fieldId: 'Field4',
-          fieldName: 'Lapangan Kokas Cibabat Park',
-          location: 'Kota Kasablanka, Jakarta',
-          sports: [
-            {
-              sportId: 'Basket',
-              sportName: 'Basket',
-              sportDescription: 'Basket Dengan Teman',
-              packages: [
-                {
-                  packageName: 'VIP',
-                  price: '1000000',
-                  sku: 'VIP-BASKET-KOKAS',
-                  duration: '2',
-                  details: 'Pake VIP',
-                },
-              ],
-            },
-            {
-              sportId: 'Futsal',
-              sportName: 'Futsal',
-              sportDescription: 'Olahraga Futsal',
-              packages: [
-                {
-                  packageName: 'Single Visit',
-                  price: '50000',
-                  sku: 'SV-FS-001',
-                  duration: '1',
-                  details: 'Paket 1 Jam',
-                },
-                {
-                  packageName: 'VIP 6 Bulan',
-                  price: '100000',
-                  sku: 'VIP-FS-001',
-                  duration: '1',
-                  details: 'Paket VIP',
-                },
-              ],
-            },
-            {
-              sportId: 'Tennis',
-              sportName: 'Tennis',
-              sportDescription: 'Tennis dengan teman',
-              packages: [],
-            },
-          ],
-        },
-        user: {
-          id: 'W50iIvqCtvaQDh1dnLGt3rMQ3B42',
-          email: 'dev@ritramd.id',
-          role: 'Manager',
-        },
-      },
-    ];
-    console.log(parseData(dummmy[0]));
+    const liveData = useLiveData();
+    const dataBooking = liveData.newBooking;
+
     return {
       selectedDate: today(),
-      agenda: parseData(dummmy[0]),
-      leftColumnOptions: [
-        {
-          id: 'over-due',
-          label: 'Over Due',
-        },
-      ],
-      rightColumnOptions: [
-        {
-          id: 'summary',
-          label: 'Summary',
-        },
-      ],
+      agenda: parseData(dataBooking),
     };
+  },
+  async mounted() {
+    const liveData = useLiveData();
+    await liveData.fetchNewBookings();
   },
   computed: {
     getAgenda() {
@@ -199,9 +201,6 @@ export default defineComponent({
     },
   },
   methods: {
-    // getAgenda(day) {
-    //   return this.agenda[parseInt(day.weekday, 10)];
-    // },
     onToday() {
       this.$refs.calendar.moveToToday();
     },
@@ -235,142 +234,4 @@ export default defineComponent({
   },
 });
 
-function parseData(data) {
-  // Create an empty object to hold the parsed data
-  const parsedData = {};
-
-  // Extract the day of the week from the startTime
-  const dayOfWeek = new Date(data.startTime).getDay();
-
-  // Create an array for this day of the week if it doesn't exist
-  if (!parsedData[dayOfWeek]) {
-    parsedData[dayOfWeek] = [];
-  }
-
-  // Push the new structure into the array for this day of the week
-  parsedData[dayOfWeek].push({
-    time: data.startTime.split(' ')[1], // Get the time part from the startTime
-    avatar: 'https://cdn.quasar.dev/img/boy-avatar.png', // Static avatar link
-    desc: data.package.details, // Description from the package details
-  });
-
-  return parsedData;
-}
-
-// {
-//   // value represents day of the week
-//   1: [
-//     {
-//       time: '08:00',
-//       avatar: 'https://cdn.quasar.dev/img/boy-avatar.png',
-//       desc: 'Meeting with CEO',
-//     },
-//     {
-//       time: '08:30',
-//       avatar: 'https://cdn.quasar.dev/img/avatar.png',
-//       desc: 'Meeting with HR',
-//     },
-//     {
-//       time: '10:00',
-//       avatar: 'https://cdn.quasar.dev/img/avatar1.jpg',
-//       desc: 'Meeting with Karen',
-//     },
-//   ],
-//   2: [
-//     {
-//       time: '11:30',
-//       avatar: 'https://cdn.quasar.dev/img/avatar2.jpg',
-//       desc: 'Meeting with Alisha',
-//     },
-//     {
-//       time: '17:00',
-//       avatar: 'https://cdn.quasar.dev/img/avatar3.jpg',
-//       desc: 'Meeting with Sarah',
-//     },
-//   ],
-//   3: [
-//     {
-//       time: '08:00',
-//       desc: 'Stand-up SCRUM',
-//       avatar: 'https://cdn.quasar.dev/img/material.png',
-//     },
-//     {
-//       time: '09:00',
-//       avatar: 'https://cdn.quasar.dev/img/boy-avatar.png',
-//     },
-//     {
-//       time: '10:00',
-//       desc: 'Sprint planning',
-//       avatar: 'https://cdn.quasar.dev/img/material.png',
-//     },
-//     {
-//       time: '13:00',
-//       avatar: 'https://cdn.quasar.dev/img/avatar1.jpg',
-//     },
-//   ],
-//   4: [
-//     {
-//       time: '09:00',
-//       avatar: 'https://cdn.quasar.dev/img/avatar3.jpg',
-//     },
-//     {
-//       time: '10:00',
-//       avatar: 'https://cdn.quasar.dev/img/avatar2.jpg',
-//     },
-//     {
-//       time: '13:00',
-//       avatar: 'https://cdn.quasar.dev/img/material.png',
-//     },
-//   ],
-//   5: [
-//     {
-//       time: '08:00',
-//       avatar: 'https://cdn.quasar.dev/img/boy-avatar.png',
-//     },
-//     {
-//       time: '09:00',
-//       avatar: 'https://cdn.quasar.dev/img/avatar2.jpg',
-//     },
-//     {
-//       time: '09:30',
-//       avatar: 'https://cdn.quasar.dev/img/avatar4.jpg',
-//     },
-//     {
-//       time: '10:00',
-//       avatar: 'https://cdn.quasar.dev/img/avatar5.jpg',
-//     },
-//     {
-//       time: '11:30',
-//       avatar: 'https://cdn.quasar.dev/img/material.png',
-//     },
-//     {
-//       time: '13:00',
-//       avatar: 'https://cdn.quasar.dev/img/avatar6.jpg',
-//     },
-//     {
-//       time: '13:30',
-//       avatar: 'https://cdn.quasar.dev/img/avatar3.jpg',
-//     },
-//     {
-//       time: '14:00',
-//       avatar: 'https://cdn.quasar.dev/img/linux-avatar.png',
-//     },
-//     {
-//       time: '14:30',
-//       avatar: 'https://cdn.quasar.dev/img/avatar.png',
-//     },
-//     {
-//       time: '15:00',
-//       avatar: 'https://cdn.quasar.dev/img/boy-avatar.png',
-//     },
-//     {
-//       time: '15:30',
-//       avatar: 'https://cdn.quasar.dev/img/avatar2.jpg',
-//     },
-//     {
-//       time: '16:00',
-//       avatar: 'https://cdn.quasar.dev/img/avatar6.jpg',
-//     },
-//   ],
-// },
-</script>
+</script> -->

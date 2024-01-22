@@ -38,13 +38,18 @@
             />
           </q-card-section>
         </q-card>
+
+        <!-- Dialog that contains the PilihTanggal component -->
+        <q-dialog v-model="dialogTanggal">
+          <PilihTanggal />
+        </q-dialog>
       </q-page>
     </q-page-container>
   </q-layout>
 </template>
 
-<script>
-import { ref } from 'vue';
+<script lang="ts">
+import { defineComponent, ref } from 'vue';
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 import { useRouter } from 'vue-router';
 import Swal from 'sweetalert2';
@@ -52,8 +57,9 @@ import { db } from 'src/firebaseConfig';
 import { doc, getDoc } from 'firebase/firestore';
 import { useUserStore } from 'src/stores/user-store';
 
-export default {
+export default defineComponent({
   setup() {
+    const dialogTanggal = ref(false); // Reactive property to control dialog visibility
     const router = useRouter();
     const user = ref({
       email: '',
@@ -127,12 +133,18 @@ export default {
       }
     };
 
+    const toggleTanggal = () => {
+      dialogTanggal.value = !dialogTanggal.value;
+    };
+
     return {
       user,
       login,
+      dialogTanggal,
+      toggleTanggal,
     };
   },
-};
+});
 </script>
 
 <style>

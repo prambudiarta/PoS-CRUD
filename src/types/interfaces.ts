@@ -1,3 +1,5 @@
+import { Timestamp } from 'firebase/firestore';
+
 //DEPRECATED
 export interface Item {
   id?: string; // Optional, used if items are identifiable (e.g., by a Firestore document ID)
@@ -57,4 +59,16 @@ export interface IField {
   fieldName: string;
   location: string;
   sports?: ISport[];
+}
+
+export interface IBooking {
+  id?: string;
+  code?: string;
+  startTime: string;
+  endTime?: string;
+  sport: ISport;
+  package: IPackage;
+  field: IField;
+  user: User;
+  playTime?: Timestamp;
 }
