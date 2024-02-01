@@ -3,9 +3,10 @@
     <div>
       <!-- User Creation Form -->
       <q-form @submit.prevent="createUser">
+        <q-input v-model="newUser.name" label="Name" />
         <q-input v-model="newUser.email" label="Email" />
         <q-input v-model="newUser.password" type="password" label="Password" />
-
+        <q-input v-model="newUser.phoneNumber" label="Nomor HP" />
         <q-select
           v-model="newUser.role"
           label="Role"
@@ -33,7 +34,7 @@
             <q-btn
               flat
               icon="delete"
-              @click="deleteUser(props.row)"
+              @click="deleteOldUser(props.row)"
               label="Delete"
             />
           </q-td>
@@ -48,6 +49,14 @@
         </q-card-section>
 
         <q-card-section>
+          <q-input v-model="selectedUser.name" label="Name" />
+          <q-input v-model="selectedUser.email" label="Email" />
+          <q-input
+            v-model="selectedUser.password"
+            type="password"
+            label="Password"
+          />
+          <q-input v-model="selectedUser.phoneNumber" label="Nomor HP" />
           <q-select
             v-model="selectedRole"
             label="Select New Role"
@@ -64,10 +73,17 @@
   </q-page>
 </template>
 
-<script>
-import { ref, onMounted } from 'vue';
+<script lang="ts">
+import { ref, onMounted, defineComponent } from 'vue';
 import { db } from 'src/firebaseConfig';
-import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  updatePassword,
+  updateEmail,
+  deleteUser,
+} from 'firebase/auth';
 import {
   collection,
   doc,
@@ -76,12 +92,13 @@ import {
   deleteDoc,
   updateDoc,
 } from 'firebase/firestore';
+import { User } from 'src/types/interfaces';
 import Swal from 'sweetalert2';
 
-export default {
+export default defineComponent({
   setup() {
-    const users = ref([]);
-    const newUser = ref({ email: '', password: '', role: '' });
+    const users = ref([] as User[]);
+    const newUser = ref({} as User);
     const roles = ref([
       { label: 'Manager', value: 'Manager' },
       { label: 'Customer Service', value: 'Customer Service' },
@@ -89,28 +106,60 @@ export default {
     ]);
 
     const columns = ref([
+      { name: 'name', label: 'Nama', field: 'name', sortable: true },
+      {
+        name: 'phoneNumber',
+        label: 'Nomer HP',
+        field: 'phoneNumber',
+        sortable: true,
+      },
       { name: 'email', label: 'Email', field: 'email', sortable: true },
       { name: 'role', label: 'Role', field: 'role', sortable: true },
       { name: 'actions', label: 'Actions', field: 'actions', sortable: false },
     ]);
 
     const editDialog = ref(false);
-    const selectedUser = ref({});
-    const selectedRole = ref('');
+    const selectedUser = ref({} as User);
+    const selectedRole = ref({ label: '', value: '' });
+    const oldPassword = ref('');
 
-    const editRole = (user) => {
+    const editRole = (user: User) => {
       selectedUser.value = user;
+      oldPassword.value = user.password;
       editDialog.value = true;
     };
 
     const updateUserRole = async () => {
       try {
-        if (selectedUser.value) {
+        if (selectedUser.value.id) {
           const userRef = doc(db, 'users', selectedUser.value.id);
+          const pass = oldPassword.value;
 
           // Update user role in Firestore
           await updateDoc(userRef, {
-            role: selectedRole.value.value,
+            ...selectedUser.value,
+          });
+
+          const auth = getAuth();
+          const userCredential = await signInWithEmailAndPassword(
+            auth,
+            selectedUser.value.email,
+            pass
+          );
+
+          // Update email
+          await updateEmail(userCredential.user, selectedUser.value.email).then(
+            () => {
+              console.log('Email updated successfully!');
+            }
+          );
+
+          // Update password
+          await updatePassword(
+            userCredential.user,
+            selectedUser.value.password
+          ).then(() => {
+            console.log('Password updated successfully!');
           });
 
           // Update the role in the local 'users' array
@@ -118,7 +167,7 @@ export default {
             (u) => u.id === selectedUser.value.id
           );
           if (userIndex !== -1) {
-            users.value[userIndex].role = selectedRole.value;
+            users.value[userIndex].role = selectedRole.value.value;
           }
 
           editDialog.value = false; // Close dialog
@@ -130,9 +179,11 @@ export default {
           querySnapshot.forEach((doc) => {
             users.value.push(doc.data());
           });
+          selectedUser.value = {} as User;
         }
       } catch (error) {
         console.error('Error updating user role:', error);
+        selectedUser.value = {} as User;
       }
     };
 
@@ -163,9 +214,12 @@ export default {
           id: userCredential.user.uid,
           email: newUser.value.email,
           role: newUser.value.role.value,
+          password: newUser.value.password,
+          phoneNumber: newUser.value.phoneNumber,
+          name: newUser.value.name,
           // other initial user data...
         });
-        newUser.value = { email: '', password: '', role: '' }; // Reset form
+        newUser.value = {} as User; // Reset form
 
         users.value = [];
         const querySnapshot = await getDocs(collection(db, 'users'));
@@ -183,18 +237,10 @@ export default {
       } catch (error) {
         console.error('Error creating user:', error);
         Swal.close();
-        Swal.fire({
-          title: 'Mohon Maaf, Gagal Membuat User',
-          text: error,
-          icon: 'warning',
-          showCancelButton: true,
-          confirmButtonColor: '#3085d6',
-          confirmButtonText: 'OK',
-        });
       }
     };
 
-    const deleteUser = async (user) => {
+    const deleteOldUser = async (user: User) => {
       try {
         Swal.fire({
           title: 'Are you sure?',
@@ -206,7 +252,16 @@ export default {
           confirmButtonText: 'Yes, delete it!',
         }).then(async (result) => {
           if (result.isConfirmed) {
-            const userRef = doc(db, 'users', user.id);
+            const userRef = doc(db, 'users', user.id!);
+
+            const auth = getAuth();
+            const userCredential = await signInWithEmailAndPassword(
+              auth,
+              user.email,
+              user.password
+            );
+
+            await deleteUser(userCredential.user);
 
             // Delete user from Firestore
             await deleteDoc(userRef);
@@ -225,14 +280,16 @@ export default {
       users,
       newUser,
       roles,
+      selectedUser,
       createUser,
       deleteUser,
       columns,
       editRole,
       updateUserRole,
+      deleteOldUser,
       editDialog,
       selectedRole,
     };
   },
-};
+});
 </script>

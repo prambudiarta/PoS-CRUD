@@ -1,7 +1,7 @@
 <template>
   <q-page padding>
     <div class="q-pa-md">
-      <div style="margin-bottom: 50px">
+      <div style="margin-bottom: 50px" v-if="isManager">
         <q-btn
           label="Add New Field"
           color="primary"
@@ -141,7 +141,7 @@
               <div>{{ field.location }}</div>
             </div>
             <div>
-              <div>
+              <div v-if="isManager">
                 <q-btn flat icon="edit" @click="editField(field)" />
                 <q-btn
                   flat
@@ -165,7 +165,7 @@
                 <div class="text-subtitle1">{{ sport.sportName }}</div>
                 <div>{{ sport.sportDescription }}</div>
               </div>
-              <div>
+              <div v-if="isManager">
                 <q-btn flat icon="edit" @click="editSport(sport, field)" />
                 <q-btn
                   flat
@@ -189,7 +189,7 @@
                   <div>Rp. {{ pck.price }}</div>
                   <div>{{ pck.duration }} Jam</div>
                 </div>
-                <div>
+                <div v-if="isManager">
                   <q-btn
                     flat
                     icon="edit"
@@ -205,6 +205,7 @@
               </q-card-section>
             </div>
             <q-btn
+              v-if="isManager"
               flat
               icon="add"
               @click="createPackage(sport, field)"
@@ -214,6 +215,7 @@
           <q-card-section>
             <q-btn
               flat
+              v-if="isManager"
               icon="add"
               @click="createSport(field)"
               label="Add Sport"
@@ -237,6 +239,7 @@ import {
 } from 'firebase/firestore';
 import Swal from 'sweetalert2';
 import { useLiveData } from 'src/stores/live-data';
+import { useUserStore } from 'src/stores/user-store';
 
 export default defineComponent({
   name: 'FieldsList',
@@ -248,6 +251,7 @@ export default defineComponent({
     const editSportDialog = ref(false);
     const newPackage = ref({} as IPackage);
     const editPackageDialog = ref(false);
+    const isManager = ref(false);
 
     const isEditMode = ref(false);
 
@@ -259,6 +263,8 @@ export default defineComponent({
 
       fields.value = liveData.fields;
     };
+
+    const userStore = useUserStore();
 
     const saveNewField = async () => {
       if (
@@ -445,7 +451,15 @@ export default defineComponent({
       loadFields();
     };
 
-    onMounted(loadFields);
+    onMounted(() => {
+      loadFields();
+      if (
+        userStore.currentUser.role === 'Manager' ||
+        userStore.currentUser.role === 'super-admin'
+      ) {
+        isManager.value = true;
+      }
+    });
 
     return {
       isEditMode,
@@ -462,6 +476,7 @@ export default defineComponent({
       saveSport,
       newPackage,
       editPackageDialog,
+      isManager,
       createPackage,
       editPackage,
       savePackage,

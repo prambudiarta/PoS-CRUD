@@ -1,37 +1,55 @@
 <template>
   <q-page padding>
     <div class="q-pa-md">
-      <q-select
-        filled
-        v-model="selectedSport"
-        :options="sportsOptions"
-        label="Select Sport"
-        @click="onSportSelect"
-      />
-      <q-select
-        filled
-        v-model="selectedField"
-        :options="fieldOptions"
-        label="Select Field"
-        class="q-mt-md"
-        @click="onFieldSelect"
-        :disable="!selectedSport"
-      />
-      <q-select
-        filled
-        v-model="selectedPackage"
-        :options="packageOptions"
-        :disable="!selectedSport"
-        label="Select Package"
-        class="q-mt-md"
-      />
-      <q-btn
-        :disable="!selectedPackage"
-        label="Pilih Waktu"
-        color="primary"
-        class="q-mt-md"
-        @click="toggleTanggal"
-      />
+      <div v-if="!isCommunity">
+        <q-select
+          filled
+          v-model="selectedUser"
+          :options="usersOption"
+          label="Select User"
+          @click="onUserSelect"
+        />
+        <q-select
+          filled
+          v-model="selectedSport"
+          :options="sportsOptions"
+          label="Select Sport"
+          class="q-mt-md"
+          @click="onSportSelect"
+          :disable="!selectedUser"
+        />
+        <q-select
+          filled
+          v-model="selectedField"
+          :options="fieldOptions"
+          label="Select Field"
+          class="q-mt-md"
+          @click="onFieldSelect"
+          :disable="!selectedSport"
+        />
+        <q-select
+          filled
+          v-model="selectedPackage"
+          :options="packageOptions"
+          :disable="!selectedSport"
+          label="Select Package"
+          class="q-mt-md"
+        />
+        <q-select
+          v-if="canReccuring"
+          v-model="recurrence"
+          :options="recurrenceOptions"
+          label="Recurrence"
+          class="q-mt-md"
+        />
+        <q-btn
+          :disable="!selectedPackage"
+          label="Pilih Waktu"
+          color="primary"
+          class="q-mt-md"
+          @click="toggleTanggal"
+        />
+      </div>
       <div class="row q-mt-md">
         <calendar-component class="full-width" />
       </div>
@@ -45,11 +63,12 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed, onMounted, Ref } from 'vue';
-import { IField } from 'src/types/interfaces';
+import { defineComponent, ref, computed, onMounted, Ref, reactive } from 'vue';
+import { IField, User } from 'src/types/interfaces';
 import { useLiveData } from 'src/stores/live-data';
 import CalendarComponent from 'src/components/CalendarComponent.vue';
 import PilihTanggal from 'src/components/PilihTanggalComponent.vue';
+import { useUserStore } from 'src/stores/user-store';
 
 export default defineComponent({
   components: { CalendarComponent, PilihTanggal },
@@ -61,22 +80,47 @@ export default defineComponent({
       // Add other methods or properties you need to access
     };
     const fields = ref([] as IField[]); // Load this from Firestore or other source
+    const user = ref([] as User[]);
     const selectedSport = ref(null);
     const selectedField = ref(null);
     const selectedPackage = ref(null);
+    const selectedUser = ref(null);
     const showPackageDialog = ref(false);
     const dialogTanggal = ref(false);
     const allData = ref({});
+    const recurrence = ref('Does not repeat');
+    const recurrenceOptions = reactive([
+      'Does not repeat',
+      'Weekly',
+      'Monthly',
+    ]);
+    const isManager = ref(false);
+    const isCommunity = ref(false);
 
     const pilihTanggalData = ref() as Ref<PilihTanggalComponent | null>;
 
     const liveData = useLiveData();
 
+    const userStore = useUserStore();
+
     const loadFields = async () => {
       await liveData.loadFields();
+      await liveData.loadUser();
 
+      user.value = liveData.user;
       fields.value = liveData.fields;
     };
+
+    const canReccuring = computed(() => {
+      if (selectedPackage.value) {
+        const packageName = selectedPackage.value.label;
+        if (packageName) {
+          return !packageName.toLowerCase().includes('single');
+        }
+        return true;
+      }
+      return false;
+    });
 
     const sportsOptions = computed(() => {
       const allSports = fields.value.flatMap((field) => field.sports);
@@ -91,13 +135,23 @@ export default defineComponent({
       }));
     });
 
+    const usersOption = computed(() => {
+      return user.value.map((user) => ({
+        label: user.name,
+        value: user,
+      }));
+    });
+
     const toggleTanggal = () => {
       allData.value = {
         isEdit: false,
         package: selectedPackage.value,
         sport: selectedSport.value,
         field: selectedField.value,
+        user: selectedUser.value,
+        recurrence: recurrence.value,
       };
+
       dialogTanggal.value = !dialogTanggal.value;
     };
 
@@ -128,6 +182,12 @@ export default defineComponent({
       );
     });
 
+    const onUserSelect = () => {
+      selectedField.value = null;
+      selectedPackage.value = null;
+      selectedSport.value = null;
+    };
+
     const onSportSelect = () => {
       selectedField.value = null;
       selectedPackage.value = null;
@@ -141,13 +201,25 @@ export default defineComponent({
       showPackageDialog.value = true;
     };
 
-    onMounted(loadFields);
+    onMounted(() => {
+      loadFields();
+      if (
+        userStore.currentUser.role === 'Manager' ||
+        userStore.currentUser.role === 'super-admin'
+      ) {
+        isManager.value = true;
+      } else if (userStore.currentUser.role === 'Community') {
+        isCommunity.value = true;
+      }
+    });
 
     return {
       fields,
       selectedSport,
       selectedField,
       selectedPackage,
+      selectedUser,
+      usersOption,
       sportsOptions,
       fieldOptions,
       packageOptions,
@@ -158,7 +230,13 @@ export default defineComponent({
       onSportSelect,
       openPackageDialog,
       dialogTanggal,
+      canReccuring,
       toggleTanggal,
+      onUserSelect,
+      recurrence,
+      recurrenceOptions,
+      isCommunity,
+      isManager,
     };
   },
 });

@@ -24,7 +24,7 @@
             >
               <div
                 :label="a.time"
-                class="justify-start q-ma-sm shadow-5 bg-grey-6"
+                :class="a.style"
                 style="margin-top: 25px"
                 @click="toggleTanggal(a)"
               >
@@ -79,6 +79,7 @@ import '@quasar/quasar-ui-qcalendar/src/QCalendarVariables.sass';
 import '@quasar/quasar-ui-qcalendar/src/QCalendarTransitions.sass';
 import '@quasar/quasar-ui-qcalendar/src/QCalendarAgenda.sass';
 import PilihTanggal from 'src/components/PilihTanggalComponent.vue';
+import { useUserStore } from 'src/stores/user-store';
 
 export default defineComponent({
   name: 'AgendaColumnOptions',
@@ -94,21 +95,30 @@ export default defineComponent({
     const calendarRef: Ref<any> = ref(null);
     const dialogTanggal = ref(false);
     const allData = ref({});
+    const isManager = ref(false);
 
     const agenda = computed(() => parseData(dataBooking.value));
+    const userStore = useUserStore();
     // Fetch new bookings when component is mounted
     onMounted(async () => {
       await liveData.fetchNewBookings();
+      if (
+        userStore.currentUser.role === 'Manager' ||
+        userStore.currentUser.role === 'super-admin'
+      ) {
+        isManager.value = true;
+      }
     });
 
     function parseData(dataArray: IBooking[]) {
       try {
         const parsedData = {};
+        const colorList = ['bg-red-2', 'bg-green-2', 'bg-blue-2'];
+        const fieldColorMap = {};
 
-        dataArray.forEach((data) => {
+        dataArray.forEach((data, index) => {
           // Convert startTime to a Date object
           const date = new Date(data.startTime);
-          const dayOfWeek = date.getDay();
 
           // Format the date as a string 'YYYY-MM-DD'
           const dateString = date.toISOString().split('T')[0];
@@ -117,16 +127,30 @@ export default defineComponent({
             parsedData[dateString] = [];
           }
 
+          // Assign a color from colorList to the field if it hasn't been assigned yet
+          if (!fieldColorMap[data.field.fieldName]) {
+            // Use modulo to cycle through the colorList if more field names than colors
+            fieldColorMap[data.field.fieldName] =
+              colorList[Object.keys(fieldColorMap).length % colorList.length];
+          }
+
+          // Get the assigned color for the field
+          const fieldColor = fieldColorMap[data.field.fieldName];
+
+          console.log(data.field.fieldName);
+
           parsedData[dateString].push({
             data: data,
+            style: `justify-start q-ma-sm shadow-5 ${fieldColor}`,
             time: data.startTime.split(' ')[1],
             avatar: 'https://cdn.quasar.dev/img/boy-avatar.png',
-            desc: `${data.field.fieldName} ${data.sport.sportName} ${data.package.details}`,
+            desc: `${data.field.fieldName} ${data.sport.sportName} ${data.user.name}`,
           });
         });
 
         return parsedData;
       } catch (e) {
+        console.error(e); // It's good practice to log the error
         return {};
       }
     }
@@ -140,16 +164,19 @@ export default defineComponent({
     });
 
     const toggleTanggal = (data: any) => {
-      allData.value = {
-        isEdit: true,
-        id: data.data.id,
-        startTime: data.data.startTime,
-        package: { label: 'Package', value: data.data.package },
-        sport: { label: 'Sport', value: data.data.sport },
-        field: { label: 'Field', value: data.data.field },
-      };
-      dialogTanggal.value = !dialogTanggal.value;
-      console.log(allData.value);
+      if (isManager.value) {
+        allData.value = {
+          isEdit: true,
+          id: data.data.id,
+          startTime: data.data.startTime,
+          package: { label: 'Package', value: data.data.package },
+          sport: { label: 'Sport', value: data.data.sport },
+          field: { label: 'Field', value: data.data.field },
+          user: { label: 'User', value: data.data.user },
+          recurrence: 'Does not repeat',
+        };
+        dialogTanggal.value = !dialogTanggal.value;
+      }
     };
 
     const onToday = () => {
@@ -176,6 +203,7 @@ export default defineComponent({
       getAgenda,
       dialogTanggal,
       allData,
+      isManager,
       toggleTanggal,
       onToday,
       onPrev,

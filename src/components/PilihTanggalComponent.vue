@@ -54,16 +54,6 @@
         </div>
       </q-card-section>
 
-      <q-card-section v-if="canReccuring && !isEdit">
-        <q-select
-          v-model="recurrence"
-          :options="recurrenceOptions"
-          label="Recurrence"
-          emit-value
-          map-options
-        />
-      </q-card-section>
-
       <q-card-section align="right">
         <div v-if="!isEdit">
           <q-btn label="Save" color="primary" @click="saveEvent" />
@@ -113,7 +103,7 @@ export default defineComponent({
     const selectedDate = ref(
       new Date().toISOString().split('T')[0].replace(/-/g, '/')
     ); // Holds the date
-    const selectedTime = ref('08:00'); // Default start time
+    const selectedTime = ref(''); // Default start time
 
     const dateTime = computed({
       get: () => {
@@ -178,8 +168,6 @@ export default defineComponent({
         booking.startTime.split(' ')[1].substring(0, 5)
       );
 
-      console.log(getBookingsForFieldAndDate.value);
-      console.log(bookedSlots);
       const adjustedBookedSlots = adjustBookedSlots(bookedSlots);
       const allSlots = generateTimeSlots();
 
@@ -219,6 +207,14 @@ export default defineComponent({
       return true;
     });
 
+    function formatDate(date, originalStartTime) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const time = originalStartTime.split(' ')[1]; // Extract the time part from the original startTime
+      return `${year}-${month}-${day} ${time}`;
+    }
+
     function getToday() {
       const now = new Date();
       now.setHours(0, 0, 0, 0); // Set time to the start of the day (midnight)
@@ -238,30 +234,56 @@ export default defineComponent({
       return date >= today && date <= twelveMonthsLater;
     }
 
-    const recurrence = ref('Does not repeat');
-    const recurrenceOptions = reactive([
-      'Does not repeat',
-      'Weekly',
-      'Monthly',
-    ]);
-
     const saveEvent = async () => {
-      const data: IBooking = {
+      const baseData: IBooking = {
         sport: choosenData.value.sport.value,
         package: choosenData.value.package.value,
         field: choosenData.value.field.value,
-        user: userStore.currentUser,
-        startTime: dateTime.value.replace(/\//g, '-'),
+        user: choosenData.value.user.value,
+        startTime: dateTime.value.replace(/\//g, '-'), // Preserve the initial format
       };
 
-      const result = await liveData.saveNewBooking(data);
-      // window.location.reload();
-      if (result === 'OK') {
-        window.location.reload();
+      console.log(choosenData.value.recurrence);
+
+      if (
+        choosenData.value.recurrence === 'Weekly' ||
+        choosenData.value.recurrence === 'Monthly'
+      ) {
+        const endDate = new Date(baseData.startTime);
+        endDate.setMonth(endDate.getMonth() + 6); // 6 months from the start date
+
+        for (
+          let date = new Date(baseData.startTime);
+          date <= endDate;
+          choosenData.value.recurrence === 'Weekly'
+            ? date.setDate(date.getDate() + 7)
+            : date.setMonth(date.getMonth() + 1)
+        ) {
+          // Format the date as 'YYYY-MM-DD HH:MM', preserving the initial time format
+          const formattedDate = formatDate(date, baseData.startTime);
+
+          // Clone the base data object and update the startTime for this occurrence
+          const bookingData = { ...baseData, startTime: formattedDate };
+          console.log(formattedDate);
+
+          // Save the booking
+          const result = await liveData.saveNewBooking(bookingData);
+          if (result !== 'OK') {
+            Swal.fire('Warning', result, 'warning');
+            // break; // Exit the loop if saving fails
+          }
+        }
       } else {
-        Swal.fire('Warning', result, 'warning');
+        // Handle single or non-recurring bookings
+        console.log('non recurring');
+        const result = await liveData.saveNewBooking(baseData);
+        if (result !== 'OK') {
+          Swal.fire('Warning', result, 'warning');
+        }
       }
-      // Additional logic for saving the event
+
+      // If you need to reload or navigate after saving all bookings, do it here
+      window.location.reload();
     };
 
     const updateEvent = async () => {
@@ -269,7 +291,7 @@ export default defineComponent({
         sport: choosenData.value.sport.value,
         package: choosenData.value.package.value,
         field: choosenData.value.field.value,
-        user: userStore.currentUser,
+        user: choosenData.value.user.value,
         startTime: dateTime.value.replace(/\//g, '-'),
       };
 
@@ -310,8 +332,6 @@ export default defineComponent({
       selectedDate,
       selectedTime,
       timeOptions,
-      recurrence,
-      recurrenceOptions,
       hourOption,
       canReccuring,
       saveEvent,

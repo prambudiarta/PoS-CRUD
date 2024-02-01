@@ -52,6 +52,12 @@
           v-ripple
           @click="selectMenu('BookingShow')"
           >Show Booking</q-item
+        ><q-item
+          v-if="orderMenuExpanded && !isCommunity"
+          clickable
+          v-ripple
+          @click="selectMenu('BookingSummary')"
+          >Summary Booking</q-item
         ></q-list
       >
 

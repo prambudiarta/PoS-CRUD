@@ -41,6 +41,11 @@ const routes: RouteRecordRaw[] = [
         name: 'BookingShow',
         component: () => import('pages/booking/ShowBooking.vue'),
       },
+      {
+        path: 'summary', // Removed the leading '/'
+        name: 'BookingSummary',
+        component: () => import('pages/booking/SummaryBooking.vue'),
+      },
     ],
     meta: { requiresAuth: true },
   },

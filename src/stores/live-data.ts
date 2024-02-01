@@ -1,4 +1,3 @@
-import { E } from 'app/dist/pwa/assets/index.3d616b04';
 import {
   addDoc,
   collection,
@@ -14,7 +13,13 @@ import {
 import { defineStore } from 'pinia';
 import { db } from 'src/firebaseConfig';
 import { minionUiSendMail } from 'src/minion/minion_send_email';
-import { Booking, IBooking, IField, Lapangan } from 'src/types/interfaces';
+import {
+  Booking,
+  IBooking,
+  IField,
+  Lapangan,
+  User,
+} from 'src/types/interfaces';
 import {
   generateUniqueCode,
   isCodeUnique,
@@ -24,6 +29,7 @@ import formatDateFirestore from 'src/utils/firebaseDateFormatter';
 
 export const useLiveData = defineStore('liveData', {
   state: () => ({
+    user: [] as User[],
     lapangan: [] as Lapangan[],
     bookings: [] as Booking[],
     fields: [] as IField[],
@@ -31,6 +37,24 @@ export const useLiveData = defineStore('liveData', {
   }),
   getters: {},
   actions: {
+    async loadUser() {
+      const userCollection = collection(db, 'users');
+      const userSnapshot = await getDocs(query(userCollection));
+
+      this.user = userSnapshot.docs.map((doc) => {
+        const data = doc.data();
+        // Ensure that the data conforms to the Item type
+        const user: User = {
+          id: doc.id,
+          email: data.email,
+          role: data.role,
+          name: data.name,
+          phoneNumber: data.phoneNumber,
+          // This field might be optional
+        };
+        return user;
+      });
+    },
     async loadFields() {
       const fieldsCollection = collection(db, 'lapangan');
       const fieldsSnapshot = await getDocs(query(fieldsCollection));
