@@ -32,8 +32,6 @@ export async function minionUiSendMail(
     });
 
     // Check response status or other properties as needed
-    console.log(response.data); // You can log the response or handle it as needed
-
     return true;
   } catch (error) {
     console.error('Error sending email: ', error);

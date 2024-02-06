@@ -95,6 +95,9 @@ export default defineComponent({
             id: userCredential.user.uid,
             email: userData.email,
             role: userData.role,
+            name: userData.name,
+            phoneNumber: userData.phoneNumber,
+            password: '',
           });
         } else {
           // If user data does not exist in Firestore, treat as super admin
@@ -103,7 +106,10 @@ export default defineComponent({
             userStore.setUser({
               id: userCredential.user.uid,
               email: user.value.email,
-              role: 'Manager',
+              role: 'Super Admin',
+              name: 'Super Admin',
+              phoneNumber: '082247529967',
+              password: '',
             });
           } else {
             throw Error('User Sudah Dihapus!');

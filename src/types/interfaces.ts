@@ -46,7 +46,7 @@ export interface IPackage {
   price: number;
   sku: string;
   duration: number;
-  details?: string;
+  details?: number;
 }
 
 // Define the structure for a sport, which includes a collection of packages

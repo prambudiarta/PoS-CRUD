@@ -30,7 +30,10 @@ const routes: RouteRecordRaw[] = [
         component: () => import('pages/lapangan/ShowFields.vue'),
       },
     ],
-    meta: { requiresAuth: true, role: ['Customer Service', 'Manager'] },
+    meta: {
+      requiresAuth: true,
+      role: ['Customer Service', 'Manager', 'Super Admin'],
+    },
   },
   {
     path: '/booking',
@@ -61,7 +64,7 @@ const routes: RouteRecordRaw[] = [
       { path: 'create', component: () => import('pages/User/CreateUser.vue') },
       { path: 'edit/:id', component: () => import('pages/User/EditUser.vue') },
     ],
-    meta: { requiresAuth: true, role: 'Manager' },
+    meta: { requiresAuth: true, role: ['Manager', 'Super Admin'] },
   },
   // Always leave this as last one,
   // but you can also remove it

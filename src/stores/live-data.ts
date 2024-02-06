@@ -50,6 +50,7 @@ export const useLiveData = defineStore('liveData', {
           role: data.role,
           name: data.name,
           phoneNumber: data.phoneNumber,
+          password: data.password,
           // This field might be optional
         };
         return user;
@@ -106,15 +107,11 @@ export const useLiveData = defineStore('liveData', {
       this.fields = await Promise.all(fieldsPromises);
     },
     async saveNewBooking(booking: IBooking) {
-      console.log('startSaving');
-
       try {
         booking.endTime = calculateEndTime(
           booking.startTime,
           booking.package.duration
         );
-
-        console.log(booking);
 
         const startTime = new Date(booking.startTime);
         const endTime = new Date(booking.endTime);
@@ -146,6 +143,8 @@ export const useLiveData = defineStore('liveData', {
         const docName = `${booking.startTime}_${booking.endTime}_${booking.field.fieldId}_${uniqueCode}`;
 
         await setDoc(doc(db, 'newBooking', docName), bookingWithCode);
+
+        await this.sendEmail(bookingWithCode, false);
 
         return 'OK';
       } catch (error) {
@@ -345,7 +344,7 @@ export const useLiveData = defineStore('liveData', {
 
         await addDoc(collection(db, 'bookings'), bookingWithCode);
 
-        this.sendEmail(bookingWithCode, false);
+        // this.sendEmail(bookingWithCode, false);
 
         return 'OK';
       } catch (error) {
@@ -421,7 +420,7 @@ export const useLiveData = defineStore('liveData', {
 
         await updateDoc(bookingRef, updateObject);
 
-        this.sendEmail(updateObject as Booking, true);
+        // this.sendEmail(updateObject as Booking, true);
 
         const index = this.bookings.findIndex(
           (booking) => booking.id === updatedBooking.id
@@ -467,7 +466,7 @@ export const useLiveData = defineStore('liveData', {
 
       return !overlaps;
     },
-    sendEmail(booking: Booking, isEdit: boolean) {
+    async sendEmail(booking: IBooking, isEdit: boolean) {
       let title = '';
 
       if (isEdit) {
@@ -481,26 +480,23 @@ export const useLiveData = defineStore('liveData', {
         <h2 style="color: #333;">${title}</h2>
       </div>
       <div style="margin: 20px;">
-        <p style="margin-bottom: 10px;">Halo ${booking.phoneNumber},</p>
+        <p style="margin-bottom: 10px;">Halo ${booking.user.name},</p>
         <p style="margin-bottom: 10px;">Terima kasih telah melakukan pemesanan lapangan melalui sistem kami. Berikut adalah detail pemesanan Anda:</p>
         <p style="margin-bottom: 10px;"><strong>Kode Pemesanan:</strong> ${
           booking.code
         }</p>
         <p style="margin-bottom: 10px;"><strong>Nama Lapangan:</strong> ${
-          booking.lapangan
+          booking.field.fieldName
         }</p>
         <p style="margin-bottom: 10px;"><strong>Olahraga:</strong> ${
-          booking.olahraga
+          booking.sport.sportName
         }</p>
         <p style="margin-bottom: 10px;"><strong>Waktu Mulai:</strong> ${formatDateFirestore(
           booking.startTime
         )}</p>
         <p style="margin-bottom: 10px;"><strong>Waktu Selesai:</strong> ${formatDateFirestore(
-          booking.endTime
+          booking.endTime!
         )}</p>
-        <p style="margin-bottom: 10px;"><strong>Total Harga:</strong> Rp${
-          booking.harga
-        }</p>
         <p style="margin-bottom: 10px;">Harap simpan kode pemesanan ini untuk referensi Anda. Jika Anda memiliki pertanyaan atau perlu melakukan perubahan pada pemesanan Anda, silakan hubungi kami di [Nomor Kontak/Email].</p>
       </div>
       <div style="background: #f4f4f4; padding: 10px; text-align: center;">
@@ -509,7 +505,7 @@ export const useLiveData = defineStore('liveData', {
       </div>
     `;
 
-      minionUiSendMail(booking.code, booking.email, message);
+      await minionUiSendMail(booking.code!, booking.user.email, message);
     },
   },
 });

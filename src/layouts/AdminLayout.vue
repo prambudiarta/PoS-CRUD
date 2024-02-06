@@ -110,7 +110,7 @@ export default {
         isCommunity.value = true;
       } else if (
         userStore.currentUser.role === 'Manager' ||
-        userStore.currentUser.role === 'super-admin'
+        userStore.currentUser.role === 'Super Admin'
       ) {
         isManager.value = true;
       }

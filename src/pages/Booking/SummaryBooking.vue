@@ -2,7 +2,7 @@
   <q-page padding>
     <div class="flex justify-between row q-mb-md">
       <!-- Actions Section -->
-      <div class="flex column q-mr-md" v-if="!isCommunity">
+      <div class="flex column q-mr-md" v-if="isSuperAdmin">
         <div class="text-h6 q-mb-md">Actions</div>
         <q-btn
           label="Download"
@@ -55,6 +55,12 @@
         </q-td>
       </template>
     </q-table>
+    <q-inner-loading
+      :showing="loading"
+      label="Please wait..."
+      label-class="text-blue"
+      label-style="font-size: 1.1em"
+    />
   </q-page>
 </template>
 
@@ -84,6 +90,8 @@ export default defineComponent({
     const startDateFilter = ref('');
     const endDateFilter = ref('');
     const isCommunity = ref(true);
+    const isSuperAdmin = ref(false);
+    const loading = ref(true);
 
     const userStore = useUserStore();
 
@@ -157,9 +165,15 @@ export default defineComponent({
         sortable: true,
       },
       {
-        name: 'email',
-        label: 'Email',
-        field: (row) => row.user.email,
+        name: 'harga',
+        label: 'Price',
+        field: (row) => row.package.price,
+        sortable: true,
+      },
+      {
+        name: 'phoneNumber',
+        label: 'Nomer HP',
+        field: (row) => row.user.phoneNumber,
         sortable: true,
       },
       {
@@ -190,6 +204,7 @@ export default defineComponent({
 
     const fetchBookings = async () => {
       await liveDataStore.fetchNewBookings();
+      loading.value = false;
       bookings.value = liveDataStore.newBooking;
       console.log(bookings.value);
     };
@@ -243,6 +258,10 @@ export default defineComponent({
       if (userStore.currentUser.role !== 'Community') {
         isCommunity.value = false;
       }
+
+      if (userStore.currentUser.role === 'Super Admin') {
+        isSuperAdmin.value = true;
+      }
       fetchBookings();
     });
 
@@ -267,8 +286,10 @@ export default defineComponent({
       filterSelection,
       startDateFilter,
       endDateFilter,
+      isSuperAdmin,
       exportToExcel,
       getBadgeColor,
+      loading,
     };
   },
 });

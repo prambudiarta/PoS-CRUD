@@ -2,7 +2,7 @@
   <div class="q-pa-md">
     <q-card>
       <q-card-section>
-        <div class="text-h6">Court Reservation</div>
+        <div class="text-h6">Reservasi Lapangan</div>
       </q-card-section>
 
       <q-card-section class="flex flex-center q-gutter-md">
@@ -235,6 +235,15 @@ export default defineComponent({
     }
 
     const saveEvent = async () => {
+      Swal.fire({
+        title: 'Loading...',
+        text: 'Please wait.',
+        allowOutsideClick: false,
+        showConfirmButton: false,
+        willOpen: () => {
+          Swal.showLoading();
+        },
+      });
       const baseData: IBooking = {
         sport: choosenData.value.sport.value,
         package: choosenData.value.package.value,
@@ -243,22 +252,21 @@ export default defineComponent({
         startTime: dateTime.value.replace(/\//g, '-'), // Preserve the initial format
       };
 
-      console.log(choosenData.value.recurrence);
-
-      if (
-        choosenData.value.recurrence === 'Weekly' ||
-        choosenData.value.recurrence === 'Monthly'
-      ) {
+      if (choosenData.value.recurrence === 'Weekly') {
         const endDate = new Date(baseData.startTime);
         endDate.setMonth(endDate.getMonth() + 6); // 6 months from the start date
+        console.log(baseData.package.details);
 
-        for (
+        // for (
+        //   let date = new Date(baseData.startTime);
+        //   date <= endDate;
+        //   choosenData.value.recurrence === 'Weekly'
+        //     ? date.setDate(date.getDate() + 7)
+        //     : date.setMonth(date.getMonth() + 1)
+        // )
+        for (let i = 0; i < baseData.package.details!; i++) {
           let date = new Date(baseData.startTime);
-          date <= endDate;
-          choosenData.value.recurrence === 'Weekly'
-            ? date.setDate(date.getDate() + 7)
-            : date.setMonth(date.getMonth() + 1)
-        ) {
+          date.setDate(date.getDate() + 7 * i);
           // Format the date as 'YYYY-MM-DD HH:MM', preserving the initial time format
           const formattedDate = formatDate(date, baseData.startTime);
 
@@ -271,6 +279,8 @@ export default defineComponent({
           if (result !== 'OK') {
             Swal.fire('Warning', result, 'warning');
             // break; // Exit the loop if saving fails
+          } else {
+            window.location.reload();
           }
         }
       } else {
@@ -279,11 +289,12 @@ export default defineComponent({
         const result = await liveData.saveNewBooking(baseData);
         if (result !== 'OK') {
           Swal.fire('Warning', result, 'warning');
+        } else {
+          window.location.reload();
         }
       }
 
       // If you need to reload or navigate after saving all bookings, do it here
-      window.location.reload();
     };
 
     const updateEvent = async () => {

@@ -103,14 +103,18 @@
               v-model="newPackage.packageName"
               label="Package Name"
             />
-            <q-input v-model="newPackage.price" label="Price" />
+            <q-input v-model="newPackage.price" label="Price" type="number" />
             <q-input v-model="newPackage.sku" label="SKU" />
             <q-input
               v-model="newPackage.duration"
               label="Duration (Jam)"
               type="number"
             />
-            <q-input v-model="newPackage.details" label="Detail" />
+            <q-input
+              v-model="newPackage.details"
+              label="Berapa Kali Main"
+              type="number"
+            />
             <!-- Add more inputs for package details if needed -->
           </q-card-section>
 
@@ -184,7 +188,7 @@
               <q-card-section class="row items-center justify-between">
                 <div>
                   <div class="text-subtitle1">{{ pck.packageName }}</div>
-                  <div>{{ pck.details }}</div>
+                  <div>{{ pck.details }} x Main</div>
                   <div>{{ pck.sku }}</div>
                   <div>Rp. {{ pck.price }}</div>
                   <div>{{ pck.duration }} Jam</div>
@@ -224,6 +228,12 @@
         </q-card>
       </div>
     </div>
+    <q-inner-loading
+      :showing="loading"
+      label="Please wait..."
+      label-class="text-blue"
+      label-style="font-size: 1.1em"
+    />
   </q-page>
 </template>
 
@@ -253,6 +263,8 @@ export default defineComponent({
     const editPackageDialog = ref(false);
     const isManager = ref(false);
 
+    const loading = ref(true);
+
     const isEditMode = ref(false);
 
     const db = getFirestore();
@@ -260,7 +272,7 @@ export default defineComponent({
 
     const loadFields = async () => {
       await liveData.loadFields();
-
+      loading.value = false;
       fields.value = liveData.fields;
     };
 
@@ -455,7 +467,7 @@ export default defineComponent({
       loadFields();
       if (
         userStore.currentUser.role === 'Manager' ||
-        userStore.currentUser.role === 'super-admin'
+        userStore.currentUser.role === 'Super Admin'
       ) {
         isManager.value = true;
       }
@@ -480,6 +492,7 @@ export default defineComponent({
       createPackage,
       editPackage,
       savePackage,
+      loading,
     };
   },
   filters: {

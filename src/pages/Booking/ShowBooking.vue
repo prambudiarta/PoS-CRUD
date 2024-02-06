@@ -59,6 +59,12 @@
     <q-dialog v-model="dialogTanggal">
       <PilihTanggal ref="pilihTanggalData" :pilih-tanggal-data="allData" />
     </q-dialog>
+    <q-inner-loading
+      :showing="loading"
+      label="Please wait..."
+      label-class="text-blue"
+      label-style="font-size: 1.1em"
+    />
   </q-page>
 </template>
 
@@ -89,13 +95,10 @@ export default defineComponent({
     const dialogTanggal = ref(false);
     const allData = ref({});
     const recurrence = ref('Does not repeat');
-    const recurrenceOptions = reactive([
-      'Does not repeat',
-      'Weekly',
-      'Monthly',
-    ]);
+    const recurrenceOptions = reactive(['Does not repeat', 'Weekly']);
     const isManager = ref(false);
     const isCommunity = ref(false);
+    const loading = ref(true);
 
     const pilihTanggalData = ref() as Ref<PilihTanggalComponent | null>;
 
@@ -106,8 +109,14 @@ export default defineComponent({
     const loadFields = async () => {
       await liveData.loadFields();
       await liveData.loadUser();
+      loading.value = false;
 
-      user.value = liveData.user;
+      user.value = liveData.user.filter(
+        (user) =>
+          user.role !== 'Manager' &&
+          user.role !== 'Super Admin' &&
+          user.role !== 'Customer Service'
+      );
       fields.value = liveData.fields;
     };
 
@@ -205,7 +214,7 @@ export default defineComponent({
       loadFields();
       if (
         userStore.currentUser.role === 'Manager' ||
-        userStore.currentUser.role === 'super-admin'
+        userStore.currentUser.role === 'Super Admin'
       ) {
         isManager.value = true;
       } else if (userStore.currentUser.role === 'Community') {
@@ -237,7 +246,15 @@ export default defineComponent({
       recurrenceOptions,
       isCommunity,
       isManager,
+      loading,
     };
   },
 });
 </script>
+
+<style>
+.q-dialog {
+  z-index: 1050;
+  /* Set to a value lower than Swal's default z-index */
+}
+</style>

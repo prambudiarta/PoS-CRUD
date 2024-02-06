@@ -70,11 +70,17 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
+    <q-inner-loading
+      :showing="loading"
+      label="Please wait..."
+      label-class="text-blue"
+      label-style="font-size: 1.1em"
+    />
   </q-page>
 </template>
 
 <script lang="ts">
-import { ref, onMounted, defineComponent } from 'vue';
+import { ref, onMounted, defineComponent, computed } from 'vue';
 import { db } from 'src/firebaseConfig';
 import {
   getAuth,
@@ -94,16 +100,39 @@ import {
 } from 'firebase/firestore';
 import { User } from 'src/types/interfaces';
 import Swal from 'sweetalert2';
+import { useUserStore } from 'src/stores/user-store';
 
 export default defineComponent({
   setup() {
-    const users = ref([] as User[]);
+    const allUser = ref([] as User[]);
     const newUser = ref({} as User);
-    const roles = ref([
-      { label: 'Manager', value: 'Manager' },
-      { label: 'Customer Service', value: 'Customer Service' },
-      { label: 'Community', value: 'Community' },
-    ]);
+
+    const isSuperAdmin = ref(false);
+    const userStore = useUserStore();
+    const loading = ref(true);
+
+    const roles = computed(() => {
+      const baseRoles = [
+        { label: 'Customer Service', value: 'Customer Service' },
+        { label: 'Community', value: 'Community' },
+      ];
+
+      if (isSuperAdmin.value) {
+        return [{ label: 'Manager', value: 'Manager' }, ...baseRoles];
+      } else {
+        return baseRoles;
+      }
+    });
+
+    const users = computed(() => {
+      if (isSuperAdmin.value) {
+        return allUser.value;
+      } else {
+        return allUser.value.filter(
+          (user) => user.role !== 'Manager' && user.role !== 'Super Admin'
+        );
+      }
+    });
 
     const columns = ref([
       { name: 'name', label: 'Nama', field: 'name', sortable: true },
@@ -135,6 +164,8 @@ export default defineComponent({
           const userRef = doc(db, 'users', selectedUser.value.id);
           const pass = oldPassword.value;
 
+          selectedUser.value.role = selectedRole.value.value;
+
           // Update user role in Firestore
           await updateDoc(userRef, {
             ...selectedUser.value,
@@ -163,11 +194,11 @@ export default defineComponent({
           });
 
           // Update the role in the local 'users' array
-          const userIndex = users.value.findIndex(
+          const userIndex = allUser.value.findIndex(
             (u) => u.id === selectedUser.value.id
           );
           if (userIndex !== -1) {
-            users.value[userIndex].role = selectedRole.value.value;
+            allUser.value[userIndex].role = selectedRole.value.value;
           }
 
           editDialog.value = false; // Close dialog
@@ -175,9 +206,9 @@ export default defineComponent({
           Swal.fire('Updated!', 'User role has been updated.', 'success');
           const querySnapshot = await getDocs(collection(db, 'users'));
 
-          users.value = [];
+          allUser.value = [];
           querySnapshot.forEach((doc) => {
-            users.value.push(doc.data());
+            allUser.value.push(doc.data());
           });
           selectedUser.value = {} as User;
         }
@@ -190,8 +221,12 @@ export default defineComponent({
     onMounted(async () => {
       const querySnapshot = await getDocs(collection(db, 'users'));
       querySnapshot.forEach((doc) => {
-        users.value.push(doc.data());
+        allUser.value.push(doc.data());
       });
+      if (userStore.currentUser.role === 'Super Admin') {
+        isSuperAdmin.value = true;
+      }
+      loading.value = false;
     });
 
     const createUser = async () => {
@@ -221,10 +256,10 @@ export default defineComponent({
         });
         newUser.value = {} as User; // Reset form
 
-        users.value = [];
+        allUser.value = [];
         const querySnapshot = await getDocs(collection(db, 'users'));
         querySnapshot.forEach((doc) => {
-          users.value.push(doc.data());
+          allUser.value.push(doc.data());
         });
 
         Swal.close();
@@ -265,7 +300,7 @@ export default defineComponent({
 
             // Delete user from Firestore
             await deleteDoc(userRef);
-            users.value = users.value.filter((u) => u.id !== user.id);
+            allUser.value = allUser.value.filter((u) => u.id !== user.id);
 
             Swal.fire('Deleted!', 'User has been deleted.', 'success');
             // Refresh items list or handle UI update here
@@ -289,6 +324,7 @@ export default defineComponent({
       deleteOldUser,
       editDialog,
       selectedRole,
+      loading,
     };
   },
 });

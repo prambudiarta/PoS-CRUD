@@ -104,7 +104,7 @@ export default defineComponent({
       await liveData.fetchNewBookings();
       if (
         userStore.currentUser.role === 'Manager' ||
-        userStore.currentUser.role === 'super-admin'
+        userStore.currentUser.role === 'Super Admin'
       ) {
         isManager.value = true;
       }
@@ -143,8 +143,7 @@ export default defineComponent({
             data: data,
             style: `justify-start q-ma-sm shadow-5 ${fieldColor}`,
             time: data.startTime.split(' ')[1],
-            avatar: 'https://cdn.quasar.dev/img/boy-avatar.png',
-            desc: `${data.field.fieldName} ${data.sport.sportName} ${data.user.name}`,
+            desc: `${data.field.fieldName} ${data.sport.sportName} ${data.code}`,
           });
         });
 

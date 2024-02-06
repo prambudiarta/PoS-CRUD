@@ -120,6 +120,7 @@ export default {
     const startDateFilter = ref('');
     const endDateFilter = ref('');
     const isCommunity = ref(true);
+    const isSuperAdmin = ref(false);
 
     const userStore = useUserStore();
 
@@ -173,8 +174,6 @@ export default {
           return bookingEndDate <= endDate;
         });
       }
-
-      return result;
 
       return result;
     });
@@ -343,6 +342,10 @@ export default {
       if (userStore.currentUser.role !== 'Community') {
         isCommunity.value = false;
       }
+
+      if (useUserStore.currentUser.role == 'Super Admin') {
+        isSuperAdmin.value = true;
+      }
       fetchBookings();
     });
 
@@ -374,6 +377,7 @@ export default {
       editBooking,
       updateBooking,
       deleteBooking,
+      isSuperAdmin,
     };
   },
 };
