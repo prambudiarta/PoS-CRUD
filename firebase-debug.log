@@ -1,0 +1,72 @@
+[debug] [2024-02-07T07:43:06.995Z] ----------------------------------------------------------------------
+[debug] [2024-02-07T07:43:06.997Z] Command:       /usr/local/bin/node /usr/local/bin/firebase deploy
+[debug] [2024-02-07T07:43:06.997Z] CLI Version:   11.9.0
+[debug] [2024-02-07T07:43:06.997Z] Platform:      darwin
+[debug] [2024-02-07T07:43:06.998Z] Node Version:  v18.12.1
+[debug] [2024-02-07T07:43:06.999Z] Time:          Wed Feb 07 2024 14:43:06 GMT+0700 (Western Indonesia Time)
+[debug] [2024-02-07T07:43:06.999Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2024-02-07T07:43:07.002Z] >>> [apiv2][query] GET https://firebase-public.firebaseio.com/cli.json [none]
+[debug] [2024-02-07T07:43:07.094Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2024-02-07T07:43:07.094Z] > authorizing via signed-in user (dev@ritramd.id)
+[debug] [2024-02-07T07:43:07.094Z] [iam] checking project cibabat-park for permissions ["datastore.indexes.create","datastore.indexes.delete","datastore.indexes.list","datastore.indexes.update","firebase.projects.get","firebasehosting.sites.update","firebaserules.releases.create","firebaserules.releases.update","firebaserules.rulesets.create"]
+[debug] [2024-02-07T07:43:07.095Z] > refreshing access token with scopes: []
+[debug] [2024-02-07T07:43:07.096Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2024-02-07T07:43:07.096Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2024-02-07T07:43:08.350Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2024-02-07T07:43:08.350Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2024-02-07T07:43:08.397Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/cibabat-park:testIamPermissions [none]
+[debug] [2024-02-07T07:43:08.398Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/cibabat-park:testIamPermissions x-goog-quota-user=projects/cibabat-park
+[debug] [2024-02-07T07:43:08.398Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/cibabat-park:testIamPermissions {"permissions":["datastore.indexes.create","datastore.indexes.delete","datastore.indexes.list","datastore.indexes.update","firebase.projects.get","firebasehosting.sites.update","firebaserules.releases.create","firebaserules.releases.update","firebaserules.rulesets.create"]}
+[debug] [2024-02-07T07:43:08.662Z] <<< [apiv2][status] GET https://firebase-public.firebaseio.com/cli.json 200
+[debug] [2024-02-07T07:43:08.662Z] <<< [apiv2][body] GET https://firebase-public.firebaseio.com/cli.json {"cloudBuildErrorAfter":1594252800000,"cloudBuildWarnAfter":1590019200000,"defaultNode10After":1594252800000,"minVersion":"3.0.5","node8DeploysDisabledAfter":1613390400000,"node8RuntimeDisabledAfter":1615809600000,"node8WarnAfter":1600128000000}
+[debug] [2024-02-07T07:43:09.485Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/cibabat-park:testIamPermissions 200
+[debug] [2024-02-07T07:43:09.485Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/cibabat-park:testIamPermissions {"permissions":["datastore.indexes.create","datastore.indexes.delete","datastore.indexes.list","datastore.indexes.update","firebase.projects.get","firebasehosting.sites.update","firebaserules.releases.create","firebaserules.releases.update","firebaserules.rulesets.create"]}
+[debug] [2024-02-07T07:43:09.486Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/cibabat-park [none]
+[debug] [2024-02-07T07:43:10.999Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/cibabat-park 200
+[debug] [2024-02-07T07:43:10.999Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/cibabat-park {"projectId":"cibabat-park","projectNumber":"65138143566","displayName":"cibabat-park","name":"projects/cibabat-park","resources":{"hostingSite":"cibabat-park","storageBucket":"cibabat-park.appspot.com","locationId":"asia-southeast2"},"state":"ACTIVE","etag":"1_fa4bc84f-3ebb-47cc-8221-e835d968f6e6"}
+[info] 
+[info] === Deploying to 'cibabat-park'...
+[info] 
+[info] i  deploying storage, firestore, hosting 
+[debug] [2024-02-07T07:43:11.001Z] >>> [apiv2][query] GET https://appengine.googleapis.com/v1/apps/cibabat-park [none]
+[debug] [2024-02-07T07:43:12.332Z] <<< [apiv2][status] GET https://appengine.googleapis.com/v1/apps/cibabat-park 200
+[debug] [2024-02-07T07:43:12.332Z] <<< [apiv2][body] GET https://appengine.googleapis.com/v1/apps/cibabat-park {"name":"apps/cibabat-park","id":"cibabat-park","authDomain":"gmail.com","locationId":"asia-southeast2","codeBucket":"staging.cibabat-park.appspot.com","servingStatus":"SERVING","defaultHostname":"cibabat-park.et.r.appspot.com","defaultBucket":"cibabat-park.appspot.com","serviceAccount":"cibabat-park@appspot.gserviceaccount.com","gcrDomain":"asia.gcr.io","databaseType":"CLOUD_FIRESTORE","featureSettings":{"splitHealthChecks":true,"useContainerOptimizedOs":true}}
+[info] i  firebase.storage: checking storage.rules for compilation errors... 
+[debug] [2024-02-07T07:43:12.335Z] >>> [apiv2][query] POST https://firebaserules.googleapis.com/v1/projects/cibabat-park:test [none]
+[debug] [2024-02-07T07:43:12.335Z] >>> [apiv2][body] POST https://firebaserules.googleapis.com/v1/projects/cibabat-park:test [omitted]
+[debug] [2024-02-07T07:43:13.791Z] <<< [apiv2][status] POST https://firebaserules.googleapis.com/v1/projects/cibabat-park:test 200
+[debug] [2024-02-07T07:43:13.792Z] <<< [apiv2][body] POST https://firebaserules.googleapis.com/v1/projects/cibabat-park:test {}
+[info] ✔  firebase.storage: rules file storage.rules compiled successfully 
+[info] i  firestore: reading indexes from firestore.indexes.json... 
+[info] i  cloud.firestore: checking firestore.rules for compilation errors... 
+[debug] [2024-02-07T07:43:13.794Z] >>> [apiv2][query] POST https://firebaserules.googleapis.com/v1/projects/cibabat-park:test [none]
+[debug] [2024-02-07T07:43:13.794Z] >>> [apiv2][body] POST https://firebaserules.googleapis.com/v1/projects/cibabat-park:test [omitted]
+[debug] [2024-02-07T07:43:15.173Z] <<< [apiv2][status] POST https://firebaserules.googleapis.com/v1/projects/cibabat-park:test 200
+[debug] [2024-02-07T07:43:15.173Z] <<< [apiv2][body] POST https://firebaserules.googleapis.com/v1/projects/cibabat-park:test {}
+[info] ✔  cloud.firestore: rules file firestore.rules compiled successfully 
+[debug] [2024-02-07T07:43:15.174Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/cibabat-park [none]
+[debug] [2024-02-07T07:43:15.559Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/cibabat-park 200
+[debug] [2024-02-07T07:43:15.559Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/cibabat-park {"projectId":"cibabat-park","projectNumber":"65138143566","displayName":"cibabat-park","name":"projects/cibabat-park","resources":{"hostingSite":"cibabat-park","storageBucket":"cibabat-park.appspot.com","locationId":"asia-southeast2"},"state":"ACTIVE","etag":"1_fa4bc84f-3ebb-47cc-8221-e835d968f6e6"}
+[debug] [2024-02-07T07:43:15.561Z] >>> [apiv2][query] POST https://firebasehosting.googleapis.com/v1beta1/projects/65138143566/sites/cibabat-park/versions [none]
+[debug] [2024-02-07T07:43:15.561Z] >>> [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/65138143566/sites/cibabat-park/versions {"config":{},"labels":{"deployment-tool":"cli-firebase"}}
+[debug] [2024-02-07T07:43:18.656Z] <<< [apiv2][status] POST https://firebasehosting.googleapis.com/v1beta1/projects/65138143566/sites/cibabat-park/versions 200
+[debug] [2024-02-07T07:43:18.657Z] <<< [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/65138143566/sites/cibabat-park/versions {"name":"projects/65138143566/sites/cibabat-park/versions/70f3d54bce481386","status":"CREATED","config":{},"labels":{"deployment-tool":"cli-firebase"}}
+[debug] [2024-02-07T07:43:18.658Z] >>> [apiv2][query] GET https://firebaserules.googleapis.com/v1/projects/cibabat-park/releases pageSize=10&pageToken=
+[debug] [2024-02-07T07:43:20.128Z] <<< [apiv2][status] GET https://firebaserules.googleapis.com/v1/projects/cibabat-park/releases 200
+[debug] [2024-02-07T07:43:20.128Z] <<< [apiv2][body] GET https://firebaserules.googleapis.com/v1/projects/cibabat-park/releases {"releases":[{"name":"projects/cibabat-park/releases/cloud.firestore","rulesetName":"projects/cibabat-park/rulesets/4dd3b8f1-140e-4422-b344-047c1a2b4388","createTime":"2024-02-06T07:03:09.291750Z","updateTime":"2024-02-07T04:04:20.615924Z"},{"name":"projects/cibabat-park/releases/firebase.storage/cibabat-park.appspot.com","rulesetName":"projects/cibabat-park/rulesets/95d8c3d5-8965-411f-a905-e53f22efb31b","createTime":"2024-02-06T07:10:23.889552Z","updateTime":"2024-02-06T07:12:54.151082Z"}]}
+[debug] [2024-02-07T07:43:20.141Z] >>> [apiv2][query] GET https://firebaserules.googleapis.com/v1/projects/cibabat-park/rulesets/95d8c3d5-8965-411f-a905-e53f22efb31b [none]
+[debug] [2024-02-07T07:43:21.638Z] <<< [apiv2][status] GET https://firebaserules.googleapis.com/v1/projects/cibabat-park/rulesets/95d8c3d5-8965-411f-a905-e53f22efb31b 200
+[debug] [2024-02-07T07:43:21.638Z] <<< [apiv2][body] GET https://firebaserules.googleapis.com/v1/projects/cibabat-park/rulesets/95d8c3d5-8965-411f-a905-e53f22efb31b [omitted]
+[info] i  storage: latest version of storage.rules already up to date, skipping upload... 
+[debug] [2024-02-07T07:43:21.640Z] >>> [apiv2][query] GET https://firebaserules.googleapis.com/v1/projects/cibabat-park/releases pageSize=10&pageToken=
+[debug] [2024-02-07T07:43:21.643Z] >>> [apiv2][query] GET https://firestore.googleapis.com/v1/projects/cibabat-park/databases/(default)/collectionGroups/-/indexes [none]
+[debug] [2024-02-07T07:43:23.831Z] <<< [apiv2][status] GET https://firestore.googleapis.com/v1/projects/cibabat-park/databases/(default)/collectionGroups/-/indexes 200
+[debug] [2024-02-07T07:43:23.831Z] <<< [apiv2][body] GET https://firestore.googleapis.com/v1/projects/cibabat-park/databases/(default)/collectionGroups/-/indexes {}
+[debug] [2024-02-07T07:43:23.832Z] >>> [apiv2][query] GET https://firestore.googleapis.com/v1/projects/cibabat-park/databases/(default)/collectionGroups/-/fields?filter=indexConfig.usesAncestorConfig=false [none]
+[debug] [2024-02-07T07:43:24.165Z] <<< [apiv2][status] GET https://firestore.googleapis.com/v1/projects/cibabat-park/databases/(default)/collectionGroups/-/fields?filter=indexConfig.usesAncestorConfig=false 200
+[debug] [2024-02-07T07:43:24.165Z] <<< [apiv2][body] GET https://firestore.googleapis.com/v1/projects/cibabat-park/databases/(default)/collectionGroups/-/fields?filter=indexConfig.usesAncestorConfig=false {"fields":[{"name":"projects/cibabat-park/databases/(default)/collectionGroups/__default__/fields/*","indexConfig":{"indexes":[{"queryScope":"COLLECTION","fields":[{"fieldPath":"*","order":"ASCENDING"}],"state":"READY"},{"queryScope":"COLLECTION","fields":[{"fieldPath":"*","order":"DESCENDING"}],"state":"READY"},{"queryScope":"COLLECTION","fields":[{"fieldPath":"*","arrayConfig":"CONTAINS"}],"state":"READY"}]}}]}
+[info] ✔  firestore: deployed indexes in firestore.indexes.json successfully 
+[debug] [2024-02-07T07:43:24.584Z] <<< [apiv2][status] GET https://firebaserules.googleapis.com/v1/projects/cibabat-park/releases 200
+[debug] [2024-02-07T07:43:24.584Z] <<< [apiv2][body] GET https://firebaserules.googleapis.com/v1/projects/cibabat-park/releases {"releases":[{"name":"projects/cibabat-park/releases/cloud.firestore","rulesetName":"projects/cibabat-park/rulesets/4dd3b8f1-140e-4422-b344-047c1a2b4388","createTime":"2024-02-06T07:03:09.291750Z","updateTime":"2024-02-07T04:04:20.615924Z"},{"name":"projects/cibabat-park/releases/firebase.storage/cibabat-park.appspot.com","rulesetName":"projects/cibabat-park/rulesets/95d8c3d5-8965-411f-a905-e53f22efb31b","createTime":"2024-02-06T07:10:23.889552Z","updateTime":"2024-02-06T07:12:54.151082Z"}]}
+[debug] [2024-02-07T07:43:24.584Z] >>> [apiv2][query] GET https://firebaserules.googleapis.com/v1/projects/cibabat-park/rulesets/4dd3b8f1-140e-4422-b344-047c1a2b4388 [none]

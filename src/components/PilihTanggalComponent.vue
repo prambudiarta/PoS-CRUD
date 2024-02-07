@@ -298,6 +298,15 @@ export default defineComponent({
     };
 
     const updateEvent = async () => {
+      Swal.fire({
+        title: 'Loading...',
+        text: 'Please wait.',
+        allowOutsideClick: false,
+        showConfirmButton: false,
+        willOpen: () => {
+          Swal.showLoading();
+        },
+      });
       const data: IBooking = {
         sport: choosenData.value.sport.value,
         package: choosenData.value.package.value,

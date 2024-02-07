@@ -6,13 +6,13 @@ import { getStorage } from 'firebase/storage';
 
 // Your web app's Firebase configuration (replace with your own config)
 const firebaseConfig = {
-  apiKey: 'AIzaSyDTf_tw6NKIVFefraP6WfVzL9bADxGrRj8',
-  authDomain: 'smartven-testing.firebaseapp.com',
-  projectId: 'smartven-testing',
-  storageBucket: 'smartven-testing.appspot.com',
-  messagingSenderId: '355653422380',
-  appId: '1:355653422380:web:b638369c0a21a30921f089',
-  measurementId: 'G-HTSFJSQMCW',
+  apiKey: 'AIzaSyCT3s40YU07yBPMb_iCXNdzndC06OZRmlE',
+  authDomain: 'cibabat-park.firebaseapp.com',
+  projectId: 'cibabat-park',
+  storageBucket: 'cibabat-park.appspot.com',
+  messagingSenderId: '65138143566',
+  appId: '1:65138143566:web:d42d7f5483c82208cd6e1f',
+  measurementId: 'G-4TQVYJD68T',
 };
 
 // Initialize Firebase
