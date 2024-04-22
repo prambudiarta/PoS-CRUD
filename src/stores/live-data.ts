@@ -117,10 +117,10 @@ export const useLiveData = defineStore('liveData', {
         const endTime = new Date(booking.endTime);
         const now = new Date();
 
-        // Check 1: start datetime can't be in the past
-        if (startTime < now) {
-          return 'Start datetime cannot be in the past.';
-        }
+        // // Check 1: start datetime can't be in the past
+        // if (startTime < now) {
+        //   return 'Start datetime cannot be in the past.';
+        // }
 
         // Check 2: end datetime must be greater than start datetime
         if (endTime <= startTime) {
