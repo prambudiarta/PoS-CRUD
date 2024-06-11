@@ -40,7 +40,6 @@
                     v-model="selectedTime"
                     mask="HH:mm"
                     format24h
-                    :minute-options="availableMinuteOptions"
                     :hour-options="availableHourOptions"
                   >
                     <div class="row items-center justify-end">
@@ -190,14 +189,14 @@ export default defineComponent({
       return Array.from(hours);
     });
 
-    const availableMinuteOptions = computed(() => {
-      // Get minutes for the selected hour
-      // const selectedHour = new Date(date.value).getHours();
-      // const minutes = availableTimeSlots.value
-      //   .filter((slot) => slot.hour === selectedHour)
-      //   .map((slot) => slot.minute);
-      return [0, 30]; // Default minutes if no specific slots are available
-    });
+    // const availableMinuteOptions = computed(() => {
+    //   // Get minutes for the selected hour
+    //   // const selectedHour = new Date(date.value).getHours();
+    //   // const minutes = availableTimeSlots.value
+    //   //   .filter((slot) => slot.hour === selectedHour)
+    //   //   .map((slot) => slot.minute);
+    //   return [0, 30]; // Default minutes if no specific slots are available
+    // });
 
     const canReccuring = computed(() => {
       const packageName = props.pilihTanggalData?.package.value.packageName;
@@ -359,7 +358,7 @@ export default defineComponent({
       optionsFn,
       deleteEvent,
       availableHourOptions,
-      availableMinuteOptions,
+      // availableMinuteOptions,
       isEdit,
       prevDate,
     };

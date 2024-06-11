@@ -41,8 +41,7 @@
             >
             </q-date>
 
-            <q-time v-model="startTime" format24h :minute-options="timeOptions">
-            </q-time>
+            <q-time v-model="startTime" format24h> </q-time>
           </div>
         </div>
 
@@ -59,8 +58,7 @@
             >
             </q-date>
 
-            <q-time v-model="endTime" format24h :minute-options="timeOptions">
-            </q-time>
+            <q-time v-model="endTime" format24h> </q-time>
           </div>
         </div>
       </q-card-section>
