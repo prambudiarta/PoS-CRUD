@@ -10,6 +10,7 @@ export interface Item {
 
 export interface Categories {
   id?: string;
+  imageUrl?: string; // URL of the item's image, optional
   category: string;
 }
 

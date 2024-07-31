@@ -88,9 +88,15 @@ export const useItemStore = defineStore('itemStore', {
         return categories;
       });
     },
-    async saveCategory(category: Omit<Categories, 'id'>) {
+    async saveCategory(category: Omit<Categories, 'id'>, file: File | null) {
+      let imageUrl = '';
+      if (file) {
+        imageUrl = await uploadImage(file);
+      }
+
       const docRef = await addDoc(collection(db, 'categories'), {
         ...category,
+        imageUrl: imageUrl,
       });
 
       this.categories.push({ id: docRef.id, ...category });
@@ -102,7 +108,7 @@ export const useItemStore = defineStore('itemStore', {
         (category) => category.id !== categoryId
       );
     },
-    async updateCategory(updatedCategory: Categories) {
+    async updateCategory(updatedCategory: Categories, file: File | null) {
       if (!updatedCategory.id) {
         throw new Error('Category must have an ID for updating');
       }

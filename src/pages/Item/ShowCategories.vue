@@ -83,6 +83,13 @@ export default {
         sortable: true,
       },
       {
+        name: 'image',
+        label: 'Image',
+        field: 'imageUrl',
+        align: 'center',
+        sortable: false,
+      },
+      {
         name: 'edit',
         label: 'Action',
         field: 'editAction',

@@ -10,6 +10,33 @@
       <q-card-section>
         <!-- Form for item data -->
         <q-input v-model="localCategory.category" label="Category Name" />
+        <div
+          v-if="localCategory.imageUrl"
+          class="q-mt-md"
+          @click="triggerFileInput"
+        >
+          <img
+            :src="localCategory.imageUrl"
+            alt="Image preview"
+            class="image-preview"
+          />
+        </div>
+
+        <input
+          v-if="localCategory.imageUrl"
+          type="file"
+          ref="fileInput"
+          accept="image/*"
+          @change="handleFileChange"
+          hidden
+        />
+        <input
+          v-else
+          type="file"
+          ref="fileInput"
+          accept="image/*"
+          @change="handleFileChange"
+        />
         <!-- Add other fields as needed -->
       </q-card-section>
 
@@ -35,16 +62,38 @@ export default {
     const dialog = ref(isOpen.value);
     const localCategory = ref({ ...props.category });
     const isEditMode = computed(() => props.category && props.category.id);
-
+    const selectedImage = ref(null);
+    const imagePreviewUrl = ref('');
+    const fileInput = ref(null);
+    const file = ref(null);
     const itemStore = useItemStore();
 
-    console.log('props');
-    console.log(props);
+    const triggerFileInput = () => {
+      fileInput.value.click();
+    };
+
+    const handleFileChange = () => {
+      if (fileInput.value && fileInput.value.files.length > 0) {
+        file.value = fileInput.value.files[0];
+        // Handle the file change logic
+        localCategory.value.imageUrl = URL.createObjectURL(file.value);
+      }
+    };
 
     // Watch for changes in isOpen prop
     watch(isOpen, (newValue) => {
       dialog.value = newValue;
     });
+
+    watch(
+      () => props.isOpen,
+      (newValue) => {
+        if (!newValue) {
+          URL.revokeObjectURL(imagePreviewUrl.value);
+          imagePreviewUrl.value = '';
+        }
+      }
+    );
 
     watch(
       () => props.category,
@@ -58,11 +107,13 @@ export default {
       try {
         if (isEditMode.value) {
           // Existing item: update it
-          await itemStore.updateCategory(localCategory.value);
+          await itemStore.updateCategory(localCategory.value, file.value);
         } else {
           // New item: add it
-          await itemStore.saveCategory(localCategory.value);
+          await itemStore.saveCategory(localCategory.value, file.value);
         }
+        selectedImage.value = null;
+
         dialog.value = false;
         emit('save');
       } catch (error) {
@@ -75,7 +126,10 @@ export default {
       dialog,
       localCategory,
       isEditMode,
+      imagePreviewUrl,
       saveCategory,
+      triggerFileInput,
+      handleFileChange,
     };
   },
 };
