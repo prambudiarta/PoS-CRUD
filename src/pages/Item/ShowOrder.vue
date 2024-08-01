@@ -392,7 +392,7 @@ export default defineComponent({
         sortable: true,
         classes: (row: { status: string }) => {
           switch (row.status) {
-            case 'complete':
+            case 'completed':
               return 'bg-green';
             case 'ongoing':
               return 'bg-blue';
