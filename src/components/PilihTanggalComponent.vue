@@ -89,7 +89,6 @@ export default defineComponent({
     const liveData = useLiveData();
 
     const choosenData = ref({ ...props.pilihTanggalData });
-    const timeOptions = [0, 30];
     const hourOption = [
       8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22,
     ];
@@ -185,7 +184,6 @@ export default defineComponent({
     const availableHourOptions = computed(() => {
       // Get unique hours from the available time slots
       const hours = new Set(availableTimeSlots.value.map((slot) => slot.hour));
-      console.log(Array.from(hours));
       return Array.from(hours);
     });
 
@@ -350,7 +348,6 @@ export default defineComponent({
       dateTime,
       selectedDate,
       selectedTime,
-      timeOptions,
       hourOption,
       canReccuring,
       saveEvent,
