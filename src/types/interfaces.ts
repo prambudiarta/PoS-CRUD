@@ -15,9 +15,10 @@ export interface Categories {
 }
 
 export enum OrderStatus {
-  Pending = 'pending',
+  Ongoing = 'ongoing',
   Completed = 'completed',
   Cancelled = 'cancelled',
+  CloseRequest = 'close_request',
 }
 
 export interface ItemDetail {

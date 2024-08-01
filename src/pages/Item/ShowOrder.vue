@@ -390,6 +390,16 @@ export default defineComponent({
         label: 'Status',
         field: 'status',
         sortable: true,
+        classes: (row: { status: string }) => {
+          switch (row.status) {
+            case 'complete':
+              return 'bg-green';
+            case 'ongoing':
+              return 'bg-blue';
+            default:
+              return 'bg-orange';
+          }
+        },
       },
     ];
 
@@ -485,5 +495,20 @@ export default defineComponent({
 
 .selected-printer {
   background-color: #e0e0e0; /* Choose a highlight color that fits your design */
+}
+
+.bg-green {
+  background-color: green;
+  color: white; /* optional: ensures the text is readable */
+}
+
+.bg-blue {
+  background-color: blue;
+  color: white; /* optional: ensures the text is readable */
+}
+
+.bg-orange {
+  background-color: orange;
+  color: white; /* optional: ensures the text is readable */
 }
 </style>

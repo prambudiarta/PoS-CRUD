@@ -107,7 +107,7 @@ export const useOrderStore = defineStore('orderStore', {
         deviceId: room.id,
         roomRate: room.price,
         startTime: startTime,
-        status: OrderStatus.Pending,
+        status: OrderStatus.Ongoing,
       };
 
       if (!room.id) {

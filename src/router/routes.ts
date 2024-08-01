@@ -8,6 +8,27 @@ const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: true },
   },
   {
+    path: '/:deviceId',
+    component: () => import('layouts/ClientLayout.vue'),
+    children: [
+      {
+        path: '',
+        children: [
+          {
+            path: '',
+            name: 'clientCurrentOrder',
+            component: () => import('pages/Client/CurrentOrder.vue'),
+          },
+          {
+            path: 'AddItem',
+            name: 'clientAddItem',
+            component: () => import('pages/Client/AddItemToOrder.vue'),
+          },
+        ],
+      },
+    ],
+  },
+  {
     path: '/admin',
     name: 'dashboard',
     component: () => import('layouts/AdminLayout.vue'),
