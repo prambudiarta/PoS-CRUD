@@ -1,5 +1,5 @@
 import { route } from 'quasar/wrappers';
-import { authGuard } from 'src/utils/authGuard';
+// import { authGuard } from 'src/utils/authGuard';
 import {
   createMemoryHistory,
   createRouter,
@@ -35,9 +35,9 @@ export default route(function (/* { store, ssrContext } */) {
     history: createHistory(process.env.VUE_ROUTER_BASE),
   });
 
-  Router.beforeEach((to, from, next) => {
-    authGuard(to, from, next);
-  });
+  // Router.beforeEach((to, from, next) => {
+  //   authGuard(to, from, next);
+  // });
 
   return Router;
 });

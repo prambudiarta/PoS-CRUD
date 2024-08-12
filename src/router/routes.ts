@@ -7,26 +7,30 @@ const routes: RouteRecordRaw[] = [
     children: [{ path: '', component: () => import('pages/IndexPage.vue') }],
     meta: { requiresAuth: true },
   },
+  // {
+  //   path: '/:deviceId',
+  //   component: () => import('layouts/ClientLayout.vue'),
+  //   children: [
+  //     {
+  //       path: '',
+  //       children: [
+  //         {
+  //           path: '',
+  //           name: 'clientCurrentOrder',
+  //           component: () => import('pages/Client/CurrentOrder.vue'),
+  //         },
+  //         {
+  //           path: 'AddItem',
+  //           name: 'clientAddItem',
+  //           component: () => import('pages/Client/AddItemToOrder.vue'),
+  //         },
+  //       ],
+  //     },
+  //   ],
+  // },
   {
     path: '/:deviceId',
-    component: () => import('layouts/ClientLayout.vue'),
-    children: [
-      {
-        path: '',
-        children: [
-          {
-            path: '',
-            name: 'clientCurrentOrder',
-            component: () => import('pages/Client/CurrentOrder.vue'),
-          },
-          {
-            path: 'AddItem',
-            name: 'clientAddItem',
-            component: () => import('pages/Client/AddItemToOrder.vue'),
-          },
-        ],
-      },
-    ],
+    component: () => import('pages/Client/SinglePageOrder.vue'),
   },
   {
     path: '/admin',
